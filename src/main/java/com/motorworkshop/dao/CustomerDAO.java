@@ -78,19 +78,65 @@ public class CustomerDAO {
         return list;
     }
 
+    public Customer findCustomerByPhone(String phone) throws SQLException {
+        if (phone == null || phone.trim().isEmpty() || "-".equals(phone.trim())) {
+            return null;
+        }
+        String sql = "SELECT c.*, " +
+                     "(SELECT COUNT(*) FROM sales s WHERE s.customer_id = c.customer_id) as total_visits, " +
+                     "(SELECT COALESCE(SUM(s.total_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_spent, " +
+                     "(SELECT MAX(s.date) FROM sales s WHERE s.customer_id = c.customer_id) as last_visit " +
+                     "FROM customers c " +
+                     "WHERE c.phone = ? LIMIT 1";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, phone.trim());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapCustomer(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    public Customer findCustomerByName(String name) throws SQLException {
+        if (name == null || name.trim().isEmpty()) {
+            return null;
+        }
+        String sql = "SELECT c.*, " +
+                     "(SELECT COUNT(*) FROM sales s WHERE s.customer_id = c.customer_id) as total_visits, " +
+                     "(SELECT COALESCE(SUM(s.total_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_spent, " +
+                     "(SELECT MAX(s.date) FROM sales s WHERE s.customer_id = c.customer_id) as last_visit " +
+                     "FROM customers c " +
+                     "WHERE LOWER(c.name) = LOWER(?) LIMIT 1";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name.trim());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapCustomer(rs);
+                }
+            }
+        }
+        return null;
+    }
+
     public boolean insertCustomer(Customer c) throws SQLException {
         String sql = "INSERT INTO customers (name, phone, address, vehicle_number, vehicle_brand, vehicle_model, notes, created_at) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, c.getName());
-            pstmt.setString(2, c.getPhone());
-            pstmt.setString(3, c.getAddress());
-            pstmt.setString(4, c.getVehicleNumber());
-            pstmt.setString(5, c.getVehicleBrand());
-            pstmt.setString(6, c.getVehicleModel());
-            pstmt.setString(7, c.getNotes());
-            pstmt.setString(8, c.getCreatedAt());
+            pstmt.setString(2, c.getPhone() != null && !c.getPhone().trim().isEmpty() ? c.getPhone().trim() : "-");
+            pstmt.setString(3, c.getAddress() != null ? c.getAddress() : "");
+            pstmt.setString(4, c.getVehicleNumber() != null ? c.getVehicleNumber() : "");
+            pstmt.setString(5, c.getVehicleBrand() != null ? c.getVehicleBrand() : "");
+            pstmt.setString(6, c.getVehicleModel() != null ? c.getVehicleModel() : "");
+            pstmt.setString(7, c.getNotes() != null ? c.getNotes() : "");
+            pstmt.setString(8, c.getCreatedAt() != null ? c.getCreatedAt() : com.motorworkshop.util.DateUtil.today());
 
             int affected = pstmt.executeUpdate();
             if (affected > 0) {

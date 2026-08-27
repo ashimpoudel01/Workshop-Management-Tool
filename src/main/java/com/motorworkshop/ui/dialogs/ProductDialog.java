@@ -75,17 +75,17 @@ public class ProductDialog extends JDialog {
         cbUnit = new JComboBox<>(new String[]{"Pcs", "Litre", "Set", "Pair", "Box", "Meter", "Kg"});
 
         // Load Categories & Suppliers
-        try {
-            List<Category> categories = inventoryService.getAllCategories();
-            cbCategory.addItem(new Category(0, "-- Select Category --", ""));
-            for (Category c : categories) cbCategory.addItem(c);
+        loadCategories();
+        loadSuppliers(0);
 
-            List<Supplier> suppliers = inventoryService.getAllSuppliers();
-            cbSupplier.addItem(new Supplier(0, "-- Select Supplier --", "", "", "", ""));
-            for (Supplier s : suppliers) cbSupplier.addItem(s);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JPanel supplierBox = new JPanel(new BorderLayout(4, 0));
+        supplierBox.setBackground(UIHelper.CARD_BG);
+        supplierBox.add(cbSupplier, BorderLayout.CENTER);
+        JButton btnAddSup = UIHelper.createSuccessButton("+");
+        btnAddSup.setToolTipText("Add New Vendor / Supplier");
+        btnAddSup.setPreferredSize(new Dimension(36, 26));
+        btnAddSup.addActionListener(e -> onAddNewSupplier());
+        supplierBox.add(btnAddSup, BorderLayout.EAST);
 
         // Row 0
         int row = 0;
@@ -97,7 +97,7 @@ public class ProductDialog extends JDialog {
 
         row++;
         addFormField(formPanel, gbc, "Category:", cbCategory, 0, row, 1);
-        addFormField(formPanel, gbc, "Primary Supplier:", cbSupplier, 1, row, 1);
+        addFormField(formPanel, gbc, "Primary Supplier:", supplierBox, 1, row, 1);
 
         row++;
         addFormField(formPanel, gbc, "Purchase Price (Rs.) *:", txtPurchasePrice, 0, row, 1);
@@ -148,6 +148,46 @@ public class ProductDialog extends JDialog {
         wrapper.add(field, BorderLayout.CENTER);
 
         panel.add(wrapper, gbc);
+    }
+
+    private void loadCategories() {
+        try {
+            cbCategory.removeAllItems();
+            List<Category> categories = inventoryService.getAllCategories();
+            cbCategory.addItem(new Category(0, "-- Select Category --", ""));
+            for (Category c : categories) cbCategory.addItem(c);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadSuppliers(int selectSupplierId) {
+        try {
+            cbSupplier.removeAllItems();
+            List<Supplier> suppliers = inventoryService.getAllSuppliers();
+            cbSupplier.addItem(new Supplier(0, "-- Select Supplier --", "", "", "", ""));
+            Supplier toSelect = null;
+            for (Supplier s : suppliers) {
+                cbSupplier.addItem(s);
+                if (selectSupplierId > 0 && s.getSupplierId() == selectSupplierId) {
+                    toSelect = s;
+                }
+            }
+            if (toSelect != null) {
+                cbSupplier.setSelectedItem(toSelect);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void onAddNewSupplier() {
+        com.motorworkshop.service.PurchaseService ps = new com.motorworkshop.service.PurchaseService();
+        SupplierDialog dlg = new SupplierDialog(this, ps, null);
+        dlg.setVisible(true);
+        if (dlg.isSaved() && dlg.getSavedSupplier() != null) {
+            loadSuppliers(dlg.getSavedSupplier().getSupplierId());
+        }
     }
 
     private void populateData() {

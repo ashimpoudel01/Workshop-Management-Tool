@@ -105,7 +105,7 @@ public class CustomerPanel extends JPanel {
         add(topContainer, BorderLayout.NORTH);
 
         // Table
-        String[] cols = {"ID", "Name", "Phone Number", "Address", "Plate / Reg No", "Brand", "Model", "Total Visits", "Total Spent (Rs.)", "Last Visit"};
+        String[] cols = {"S.N.", "Name", "Phone Number", "Address", "Plate / Reg No", "Brand", "Model", "Total Visits", "Total Spent (Rs.)", "Last Visit"};
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -131,9 +131,10 @@ public class CustomerPanel extends JPanel {
                 currentCustomerList = customerService.searchCustomers(query);
                 tableModel.setRowCount(0);
 
+                int sn = 1;
                 for (Customer c : currentCustomerList) {
                     tableModel.addRow(new Object[]{
-                            c.getCustomerId(),
+                            sn++,
                             c.getName(),
                             c.getPhone(),
                             c.getAddress() != null ? c.getAddress() : "-",
@@ -195,10 +196,12 @@ public class CustomerPanel extends JPanel {
                 return;
             }
 
-            String[] cols = {"Invoice #", "Date", "Vehicle", "Parts Fee (Rs.)", "Service Fee (Rs.)", "Total Paid (Rs.)", "Payment Method"};
+            String[] cols = {"S.N.", "Invoice #", "Date", "Vehicle", "Parts Fee (Rs.)", "Service Fee (Rs.)", "Total Paid (Rs.)", "Payment Method"};
             DefaultTableModel model = new DefaultTableModel(cols, 0);
+            int sn = 1;
             for (Sale s : sales) {
                 model.addRow(new Object[]{
+                        sn++,
                         s.getInvoiceNumber(),
                         s.getDate(),
                         s.getVehicleBrand() + " " + s.getVehicleModel() + " (" + s.getVehicleRegNo() + ")",

@@ -41,6 +41,8 @@ public class SalesPanel extends JPanel {
 
     private JLabel lblTotalRevenue;
     private JLabel lblTotalGrossProfit;
+    private JLabel lblTotalParts;
+    private JLabel lblTotalService;
     private JLabel lblTotalBills;
 
     public SalesPanel(SaleService saleService, InventoryService inventoryService,
@@ -147,7 +149,7 @@ public class SalesPanel extends JPanel {
         add(topContainer, BorderLayout.NORTH);
 
         // Sales Table
-        String[] cols = {"Inv #", "Date", "Customer Name", "Phone", "Vehicle", "Plate No", "Parts Total", "Service Fee", "Discount", "Total Paid", "COGS", "Gross Profit", "Payment"};
+        String[] cols = {"S.N.", "Inv #", "Date", "Customer Name", "Phone", "Vehicle", "Plate No", "Parts Total", "Service Fee", "Discount", "Total Paid", "COGS", "Gross Profit", "Payment"};
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -159,10 +161,18 @@ public class SalesPanel extends JPanel {
 
         // Footer Summary
         JPanel footerBar = UIHelper.createCard();
-        footerBar.setLayout(new FlowLayout(FlowLayout.RIGHT, 20, 4));
+        footerBar.setLayout(new FlowLayout(FlowLayout.RIGHT, 16, 4));
 
         lblTotalBills = new JLabel("Total Bills: 0");
         lblTotalBills.setFont(UIHelper.FONT_BOLD);
+
+        lblTotalParts = new JLabel("Parts Total: Rs. 0.00");
+        lblTotalParts.setFont(UIHelper.FONT_SUBHEADER);
+        lblTotalParts.setForeground(UIHelper.TEXT_DARK);
+
+        lblTotalService = new JLabel("Service Fees: Rs. 0.00");
+        lblTotalService.setFont(UIHelper.FONT_SUBHEADER);
+        lblTotalService.setForeground(UIHelper.TEXT_DARK);
 
         lblTotalRevenue = new JLabel("Total Revenue: Rs. 0.00");
         lblTotalRevenue.setFont(UIHelper.FONT_BIG_NUMBER);
@@ -173,6 +183,10 @@ public class SalesPanel extends JPanel {
         lblTotalGrossProfit.setForeground(UIHelper.SUCCESS_COLOR);
 
         footerBar.add(lblTotalBills);
+        footerBar.add(new JSeparator(JSeparator.VERTICAL));
+        footerBar.add(lblTotalParts);
+        footerBar.add(lblTotalService);
+        footerBar.add(new JSeparator(JSeparator.VERTICAL));
         footerBar.add(lblTotalRevenue);
         footerBar.add(lblTotalGrossProfit);
         add(footerBar, BorderLayout.SOUTH);
@@ -191,12 +205,18 @@ public class SalesPanel extends JPanel {
 
                 double totalRev = 0.0;
                 double totalGross = 0.0;
+                double totalParts = 0.0;
+                double totalService = 0.0;
 
+                int sn = 1;
                 for (Sale s : currentSalesList) {
                     totalRev += s.getTotalAmount();
                     totalGross += s.getGrossProfit();
+                    totalParts += s.getPartsTotal();
+                    totalService += s.getServiceCharge();
 
                     tableModel.addRow(new Object[]{
+                            sn++,
                             s.getInvoiceNumber(),
                             s.getDate(),
                             s.getCustomerName(),
@@ -214,6 +234,8 @@ public class SalesPanel extends JPanel {
                 }
 
                 lblTotalBills.setText("Total Bills: " + currentSalesList.size());
+                lblTotalParts.setText("Parts Total: " + FormatUtil.formatCurrency(totalParts));
+                lblTotalService.setText("Service Fees: " + FormatUtil.formatCurrency(totalService));
                 lblTotalRevenue.setText("Total Revenue: " + FormatUtil.formatCurrency(totalRev));
                 lblTotalGrossProfit.setText("Total Gross Profit: " + FormatUtil.formatCurrency(totalGross));
 

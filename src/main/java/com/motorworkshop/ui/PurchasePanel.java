@@ -72,6 +72,9 @@ public class PurchasePanel extends JPanel {
         JButton btnNew = UIHelper.createSuccessButton("+ New Purchase");
         btnNew.addActionListener(e -> openNewPurchase());
 
+        JButton btnVendors = UIHelper.createSecondaryButton("Manage Vendors");
+        btnVendors.addActionListener(e -> onManageVendors());
+
         JButton btnView = UIHelper.createPrimaryButton("View Items");
         btnView.addActionListener(e -> onViewItems());
 
@@ -82,6 +85,7 @@ public class PurchasePanel extends JPanel {
         btnExport.addActionListener(e -> CsvExporter.exportTableToCsv(this, purchaseTable, "purchases_history"));
 
         actionBtns.add(btnNew);
+        actionBtns.add(btnVendors);
         actionBtns.add(btnView);
         actionBtns.add(btnDelete);
         actionBtns.add(btnExport);
@@ -131,7 +135,7 @@ public class PurchasePanel extends JPanel {
         add(topContainer, BorderLayout.NORTH);
 
         // Table
-        String[] cols = {"ID", "Date", "Invoice / Bill No", "Supplier Name", "Total Amount (Rs.)", "Payment Status", "Notes"};
+        String[] cols = {"S.N.", "Date", "Invoice / Bill No", "Supplier Name", "Total Amount (Rs.)", "Payment Status", "Notes"};
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -176,10 +180,11 @@ public class PurchasePanel extends JPanel {
                 tableModel.setRowCount(0);
 
                 double total = 0.0;
+                int sn = 1;
                 for (Purchase p : currentPurchaseList) {
                     total += p.getTotalAmount();
                     tableModel.addRow(new Object[]{
-                            p.getPurchaseId(),
+                            sn++,
                             p.getDate(),
                             p.getInvoiceNumber(),
                             p.getSupplierName() != null ? p.getSupplierName() : "General Supplier",
@@ -199,6 +204,16 @@ public class PurchasePanel extends JPanel {
         PurchaseDialog dlg = new PurchaseDialog(parentFrame, purchaseService, inventoryService);
         dlg.setVisible(true);
         if (dlg.isSaved()) {
+            loadSuppliers();
+            loadData();
+        }
+    }
+
+    private void onManageVendors() {
+        com.motorworkshop.ui.dialogs.VendorManagementDialog dlg = new com.motorworkshop.ui.dialogs.VendorManagementDialog(parentFrame, purchaseService);
+        dlg.setVisible(true);
+        if (dlg.isChanged()) {
+            loadSuppliers();
             loadData();
         }
     }

@@ -374,6 +374,32 @@ public class SaleDAO {
         return 0.0;
     }
 
+    public double getTotalPartsRevenueInPeriod(String startDate, String endDate) throws SQLException {
+        String sql = "SELECT SUM(parts_total) FROM sales WHERE substr(date, 1, 10) >= ? AND substr(date, 1, 10) <= ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, startDate);
+            pstmt.setString(2, endDate);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return rs.getDouble(1);
+            }
+        }
+        return 0.0;
+    }
+
+    public double getTotalServiceRevenueInPeriod(String startDate, String endDate) throws SQLException {
+        String sql = "SELECT SUM(service_charge) FROM sales WHERE substr(date, 1, 10) >= ? AND substr(date, 1, 10) <= ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, startDate);
+            pstmt.setString(2, endDate);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) return rs.getDouble(1);
+            }
+        }
+        return 0.0;
+    }
+
     public double getTotalCogsInPeriod(String startDate, String endDate) throws SQLException {
         String sql = "SELECT SUM(total_cogs) FROM sales WHERE substr(date, 1, 10) >= ? AND substr(date, 1, 10) <= ?";
         try (Connection conn = DatabaseManager.getConnection();

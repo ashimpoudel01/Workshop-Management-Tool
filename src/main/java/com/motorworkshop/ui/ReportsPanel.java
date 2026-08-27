@@ -55,6 +55,9 @@ public class ReportsPanel extends JPanel {
     private JTable topPartsTable;
     private DefaultTableModel topPartsModel;
 
+    private JTable topServicesTable;
+    private DefaultTableModel topServicesModel;
+
     private ReportData currentReportData;
     private ReportService.FilterPreset currentPreset = ReportService.FilterPreset.THIS_MONTH;
 
@@ -218,7 +221,7 @@ public class ReportsPanel extends JPanel {
     private JPanel createSalesTab() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(UIHelper.CARD_BG);
-        String[] cols = {"Invoice #", "Date", "Customer Name", "Phone", "Vehicle", "Parts Total", "Service Charge", "Discount", "Total Paid", "Gross Profit", "Payment"};
+        String[] cols = {"S.N.", "Invoice #", "Date", "Customer Name", "Phone", "Vehicle", "Parts Total", "Service Charge", "Discount", "Total Paid", "Gross Profit", "Payment"};
         salesModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -231,7 +234,7 @@ public class ReportsPanel extends JPanel {
     private JPanel createPurchasesTab() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(UIHelper.CARD_BG);
-        String[] cols = {"Date", "Supplier Bill #", "Supplier Name", "Total Amount (Rs.)", "Payment Status", "Notes"};
+        String[] cols = {"S.N.", "Date", "Supplier Bill #", "Supplier Name", "Total Amount (Rs.)", "Payment Status", "Notes"};
         purchasesModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -244,7 +247,7 @@ public class ReportsPanel extends JPanel {
     private JPanel createExpensesTab() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(UIHelper.CARD_BG);
-        String[] cols = {"Date", "Category", "Description", "Amount (Rs.)", "Payment Method", "Notes"};
+        String[] cols = {"S.N.", "Date", "Category", "Description", "Amount (Rs.)", "Payment Method", "Notes"};
         expensesModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -263,7 +266,7 @@ public class ReportsPanel extends JPanel {
         JPanel left = new JPanel(new BorderLayout(4, 4));
         left.setBackground(UIHelper.CARD_BG);
         left.setBorder(new TitledBorder("Top Selling Parts"));
-        String[] partCols = {"Part Name", "Units Sold", "Total Revenue"};
+        String[] partCols = {"S.N.", "Part Name", "Units Sold", "Total Revenue"};
         topPartsModel = new DefaultTableModel(partCols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -276,13 +279,13 @@ public class ReportsPanel extends JPanel {
         JPanel right = new JPanel(new BorderLayout(4, 4));
         right.setBackground(UIHelper.CARD_BG);
         right.setBorder(new TitledBorder("Top Performing Workshop Services"));
-        String[] servCols = {"Service Name", "Jobs Done", "Total Revenue"};
-        DefaultTableModel topServModel = new DefaultTableModel(servCols, 0) {
+        String[] servCols = {"S.N.", "Service Name", "Jobs Done", "Total Revenue"};
+        topServicesModel = new DefaultTableModel(servCols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
-        JTable topServTable = new JTable(topServModel);
-        UIHelper.styleTable(topServTable);
-        right.add(new JScrollPane(topServTable), BorderLayout.CENTER);
+        topServicesTable = new JTable(topServicesModel);
+        UIHelper.styleTable(topServicesTable);
+        right.add(new JScrollPane(topServicesTable), BorderLayout.CENTER);
         panel.add(right);
 
         return panel;
@@ -342,8 +345,10 @@ public class ReportsPanel extends JPanel {
 
                 // Populate Sales Table
                 salesModel.setRowCount(0);
+                int snSales = 1;
                 for (Sale s : currentReportData.getSalesList()) {
                     salesModel.addRow(new Object[]{
+                            snSales++,
                             s.getInvoiceNumber(),
                             s.getDate(),
                             s.getCustomerName(),
@@ -360,8 +365,10 @@ public class ReportsPanel extends JPanel {
 
                 // Populate Purchases Table
                 purchasesModel.setRowCount(0);
+                int snPurchases = 1;
                 for (Purchase p : currentReportData.getPurchaseList()) {
                     purchasesModel.addRow(new Object[]{
+                            snPurchases++,
                             p.getDate(),
                             p.getInvoiceNumber(),
                             p.getSupplierName() != null ? p.getSupplierName() : "-",
@@ -373,8 +380,10 @@ public class ReportsPanel extends JPanel {
 
                 // Populate Expenses Table
                 expensesModel.setRowCount(0);
+                int snExpenses = 1;
                 for (Expense exp : currentReportData.getExpenseList()) {
                     expensesModel.addRow(new Object[]{
+                            snExpenses++,
                             exp.getDate(),
                             exp.getCategory(),
                             exp.getDescription(),
@@ -386,8 +395,16 @@ public class ReportsPanel extends JPanel {
 
                 // Populate Top Parts
                 topPartsModel.setRowCount(0);
+                int snParts = 1;
                 for (DashboardStats.TopItemMetric m : currentReportData.getTopParts()) {
-                    topPartsModel.addRow(new Object[]{m.getName(), m.getQuantity(), FormatUtil.formatCurrency(m.getTotalRevenue())});
+                    topPartsModel.addRow(new Object[]{snParts++, m.getName(), m.getQuantity(), FormatUtil.formatCurrency(m.getTotalRevenue())});
+                }
+
+                // Populate Top Services
+                topServicesModel.setRowCount(0);
+                int snServ = 1;
+                for (DashboardStats.TopItemMetric m : currentReportData.getTopServices()) {
+                    topServicesModel.addRow(new Object[]{snServ++, m.getName(), m.getQuantity(), FormatUtil.formatCurrency(m.getTotalRevenue())});
                 }
 
             } catch (Exception e) {

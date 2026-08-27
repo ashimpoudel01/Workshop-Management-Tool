@@ -52,7 +52,7 @@ public class StockHistoryDialog extends JDialog {
         contentPane.add(topPanel, BorderLayout.NORTH);
 
         // Table
-        String[] columns = {"Date", "Item Name", "Movement Type", "Qty Changed", "Previous Stock", "New Stock", "Reference", "Notes"};
+        String[] columns = {"S.N.", "Date", "Item Name", "Movement Type", "Qty Changed", "Previous Stock", "New Stock", "Reference", "Notes"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -87,8 +87,10 @@ public class StockHistoryDialog extends JDialog {
                 list = inventoryService.getRecentTransactions(150);
             }
 
+            int sn = 1;
             for (InventoryTransaction tx : list) {
                 tableModel.addRow(new Object[]{
+                        sn++,
                         tx.getDate(),
                         tx.getProductName(),
                         tx.getTransactionType(),

@@ -117,7 +117,8 @@ public class PricingPanel extends JPanel {
         panel.add(toolbar, BorderLayout.NORTH);
 
         // Table
-        String[] cols = {"Part Name", "Brand", "Part No", "Purchase Price (Rs.)", "Retail Selling (Rs.)", "Workshop Price (Rs.)", "Profit / Unit (Rs.)", "Profit Margin %", "Supplier"};
+        // Table
+        String[] cols = {"S.N.", "Part Name", "Brand", "Part No", "Purchase Price (Rs.)", "Retail Selling (Rs.)", "Workshop Price (Rs.)", "Profit / Unit (Rs.)", "Profit Margin %", "Supplier"};
         partsModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -161,7 +162,7 @@ public class PricingPanel extends JPanel {
         panel.add(toolbar, BorderLayout.NORTH);
 
         // Table
-        String[] cols = {"ID", "Service Name", "Default Rate (Rs.)", "Est. Duration", "Description", "Status"};
+        String[] cols = {"S.N.", "Service Name", "Default Rate (Rs.)", "Est. Duration", "Description", "Status"};
         servicesModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -188,8 +189,10 @@ public class PricingPanel extends JPanel {
                 }
 
                 partsModel.setRowCount(0);
+                int sn = 1;
                 for (Product p : currentProducts) {
                     partsModel.addRow(new Object[]{
+                            sn++,
                             p.getPartName(),
                             p.getBrand() != null ? p.getBrand() : "-",
                             p.getPartNumber() != null ? p.getPartNumber() : "-",
@@ -212,9 +215,10 @@ public class PricingPanel extends JPanel {
             try {
                 currentServices = pricingService.getAllServices(false);
                 servicesModel.setRowCount(0);
+                int sn = 1;
                 for (ServiceItem s : currentServices) {
                     servicesModel.addRow(new Object[]{
-                            s.getServiceId(),
+                            sn++,
                             s.getServiceName(),
                             FormatUtil.formatCurrencyPlain(s.getDefaultPrice()),
                             s.getEstimatedDurationMinutes() + " mins",
@@ -285,10 +289,12 @@ public class PricingPanel extends JPanel {
                 return;
             }
 
-            String[] cols = {"Date", "Old Buy Price", "New Buy Price", "Old Sell Price", "New Sell Price", "Reason"};
+            String[] cols = {"S.N.", "Date", "Old Buy Price", "New Buy Price", "Old Sell Price", "New Sell Price", "Reason"};
             DefaultTableModel model = new DefaultTableModel(cols, 0);
+            int sn = 1;
             for (PriceHistory h : history) {
                 model.addRow(new Object[]{
+                        sn++,
                         h.getChangeDate(),
                         FormatUtil.formatCurrencyPlain(h.getOldPurchasePrice()),
                         FormatUtil.formatCurrencyPlain(h.getNewPurchasePrice()),

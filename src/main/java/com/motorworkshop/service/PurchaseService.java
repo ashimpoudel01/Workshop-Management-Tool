@@ -59,6 +59,10 @@ public class PurchaseService {
         return supplierDAO.getAllSuppliers();
     }
 
+    public List<Supplier> searchSuppliers(String query) throws SQLException {
+        return supplierDAO.searchSuppliers(query);
+    }
+
     public boolean addSupplier(Supplier s) throws SQLException {
         if (s.getName() == null || s.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Supplier name is required!");

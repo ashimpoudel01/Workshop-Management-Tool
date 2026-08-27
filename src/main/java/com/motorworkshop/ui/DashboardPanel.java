@@ -189,7 +189,7 @@ public class DashboardPanel extends JPanel {
         lblPartsTitle.setForeground(UIHelper.PRIMARY_COLOR);
         topPartsCard.add(lblPartsTitle, BorderLayout.NORTH);
 
-        String[] partsCols = {"Part Name", "Qty", "Revenue"};
+        String[] partsCols = {"S.N.", "Part Name", "Qty", "Revenue"};
         topPartsModel = new DefaultTableModel(partsCols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -206,7 +206,7 @@ public class DashboardPanel extends JPanel {
         lblServTitle.setForeground(UIHelper.PRIMARY_COLOR);
         topServicesCard.add(lblServTitle, BorderLayout.NORTH);
 
-        String[] servCols = {"Service Name", "Jobs", "Revenue"};
+        String[] servCols = {"S.N.", "Service Name", "Jobs", "Revenue"};
         topServicesModel = new DefaultTableModel(servCols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -263,14 +263,16 @@ public class DashboardPanel extends JPanel {
 
                 // Top Parts
                 topPartsModel.setRowCount(0);
+                int snParts = 1;
                 for (DashboardStats.TopItemMetric m : stats.getTopSellingParts()) {
-                    topPartsModel.addRow(new Object[]{m.getName(), m.getQuantity(), FormatUtil.formatCurrency(m.getTotalRevenue())});
+                    topPartsModel.addRow(new Object[]{snParts++, m.getName(), m.getQuantity(), FormatUtil.formatCurrency(m.getTotalRevenue())});
                 }
 
                 // Top Services
                 topServicesModel.setRowCount(0);
+                int snServ = 1;
                 for (DashboardStats.TopItemMetric m : stats.getTopPerformingServices()) {
-                    topServicesModel.addRow(new Object[]{m.getName(), m.getQuantity(), FormatUtil.formatCurrency(m.getTotalRevenue())});
+                    topServicesModel.addRow(new Object[]{snServ++, m.getName(), m.getQuantity(), FormatUtil.formatCurrency(m.getTotalRevenue())});
                 }
 
             } catch (Exception e) {

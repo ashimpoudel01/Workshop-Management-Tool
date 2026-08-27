@@ -77,13 +77,33 @@ public class PurchaseDialog extends JDialog {
         headerForm.setBorder(new TitledBorder("Invoice Information"));
 
         cbSupplier = new JComboBox<>();
+        JPanel supplierPanel = new JPanel(new BorderLayout(4, 0));
+        supplierPanel.setBackground(UIHelper.CARD_BG);
+        supplierPanel.add(cbSupplier, BorderLayout.CENTER);
+
+        JPanel supBtns = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        supBtns.setBackground(UIHelper.CARD_BG);
+        JButton btnNewSup = UIHelper.createSuccessButton("+");
+        btnNewSup.setToolTipText("Add New Vendor / Supplier");
+        btnNewSup.setPreferredSize(new Dimension(36, 26));
+        btnNewSup.addActionListener(e -> onAddNewSupplier());
+
+        JButton btnEditSup = UIHelper.createPrimaryButton("Edit");
+        btnEditSup.setToolTipText("Edit / Change Selected Vendor Name & Details");
+        btnEditSup.setPreferredSize(new Dimension(52, 26));
+        btnEditSup.addActionListener(e -> onEditSelectedSupplier());
+
+        supBtns.add(btnNewSup);
+        supBtns.add(btnEditSup);
+        supplierPanel.add(supBtns, BorderLayout.EAST);
+
         txtInvoiceNo = new JTextField("PO-" + System.currentTimeMillis() % 100000, 12);
         txtDate = new JTextField(DateUtil.today(), 10);
         cbPaymentStatus = new JComboBox<>(new String[]{"PAID", "UNPAID", "PARTIAL"});
         txtNotes = new JTextField(15);
 
         headerForm.add(new JLabel("Supplier *:"));
-        headerForm.add(cbSupplier);
+        headerForm.add(supplierPanel);
         headerForm.add(new JLabel("Supplier Bill / Inv No *:"));
         headerForm.add(txtInvoiceNo);
 
@@ -99,15 +119,29 @@ public class PurchaseDialog extends JDialog {
         itemsContainer.setBackground(UIHelper.CARD_BG);
         itemsContainer.setBorder(new TitledBorder("Purchased Parts & Quantities"));
 
-        // Add item row
-        JPanel addItemRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
-        addItemRow.setBackground(UIHelper.CARD_BG);
+        // Add item row with GridBagLayout
+        JPanel addItemRow = UIHelper.createCard();
+        addItemRow.setLayout(new GridBagLayout());
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(4, 4, 4, 4);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
         cbProduct = new JComboBox<>();
-        cbProduct.setPreferredSize(new Dimension(300, 28));
-        txtItemQty = new JTextField("1", 6);
-        txtItemBuyPrice = new JTextField("0.00", 8);
+        JButton btnCreatePart = UIHelper.createSuccessButton("+ New");
+        btnCreatePart.setToolTipText("Create new spare part in inventory directly");
+        btnCreatePart.setPreferredSize(new Dimension(65, 30));
+        btnCreatePart.addActionListener(e -> onAddNewProduct());
+
+        JPanel productSelectPanel = new JPanel(new BorderLayout(4, 0));
+        productSelectPanel.setBackground(UIHelper.CARD_BG);
+        productSelectPanel.add(cbProduct, BorderLayout.CENTER);
+        productSelectPanel.add(btnCreatePart, BorderLayout.EAST);
+
+        txtItemQty = new JTextField("1", 4);
+        txtItemBuyPrice = new JTextField("0.00", 7);
         btnAddItem = UIHelper.createPrimaryButton("+ Add Item");
+        btnAddItem.setPreferredSize(new Dimension(130, 32));
 
         cbProduct.addActionListener(e -> {
             Product p = (Product) cbProduct.getSelectedItem();
@@ -116,13 +150,26 @@ public class PurchaseDialog extends JDialog {
             }
         });
 
-        addItemRow.add(new JLabel("Select Part:"));
-        addItemRow.add(cbProduct);
-        addItemRow.add(new JLabel("Quantity:"));
-        addItemRow.add(txtItemQty);
-        addItemRow.add(new JLabel("Buy Rate (Rs.):"));
-        addItemRow.add(txtItemBuyPrice);
-        addItemRow.add(btnAddItem);
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
+        addItemRow.add(new JLabel("Select Part:"), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
+        addItemRow.add(productSelectPanel, gbc);
+
+        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0;
+        addItemRow.add(new JLabel("Quantity:"), gbc);
+
+        gbc.gridx = 3; gbc.gridy = 0; gbc.weightx = 0;
+        addItemRow.add(txtItemQty, gbc);
+
+        gbc.gridx = 4; gbc.gridy = 0; gbc.weightx = 0;
+        addItemRow.add(new JLabel("Buy Rate (Rs.):"), gbc);
+
+        gbc.gridx = 5; gbc.gridy = 0; gbc.weightx = 0;
+        addItemRow.add(txtItemBuyPrice, gbc);
+
+        gbc.gridx = 6; gbc.gridy = 0; gbc.weightx = 0;
+        addItemRow.add(btnAddItem, gbc);
 
         itemsContainer.add(addItemRow, BorderLayout.NORTH);
 
@@ -186,20 +233,90 @@ public class PurchaseDialog extends JDialog {
     }
 
     private void loadDropdowns() {
+        loadSuppliersDropdown(0);
+        loadProductsDropdown(0);
+    }
+
+    private void loadSuppliersDropdown(int selectSupplierId) {
         try {
+            cbSupplier.removeAllItems();
             List<Supplier> suppliers = purchaseService.getAllSuppliers();
             cbSupplier.addItem(new Supplier(0, "-- Select Supplier --", "", "", "", ""));
-            for (Supplier s : suppliers) cbSupplier.addItem(s);
+            Supplier toSelect = null;
+            for (Supplier s : suppliers) {
+                cbSupplier.addItem(s);
+                if (selectSupplierId > 0 && s.getSupplierId() == selectSupplierId) {
+                    toSelect = s;
+                }
+            }
+            if (toSelect != null) {
+                cbSupplier.setSelectedItem(toSelect);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void loadProductsDropdown(int selectProductId) {
+        try {
+            cbProduct.removeAllItems();
             List<Product> products = inventoryService.getAllProducts();
             Product placeholder = new Product();
             placeholder.setItemId(0);
             placeholder.setPartName("-- Select Product --");
             cbProduct.addItem(placeholder);
-            for (Product p : products) cbProduct.addItem(p);
-
+            Product toSelect = null;
+            for (Product p : products) {
+                cbProduct.addItem(p);
+                if (selectProductId > 0 && p.getItemId() == selectProductId) {
+                    toSelect = p;
+                }
+            }
+            if (toSelect != null) {
+                cbProduct.setSelectedItem(toSelect);
+                txtItemBuyPrice.setText(String.valueOf(toSelect.getPurchasePrice()));
+            }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void onAddNewSupplier() {
+        SupplierDialog dlg = new SupplierDialog(this, purchaseService, null);
+        dlg.setVisible(true);
+        if (dlg.isSaved() && dlg.getSavedSupplier() != null) {
+            loadSuppliersDropdown(dlg.getSavedSupplier().getSupplierId());
+        }
+    }
+
+    private void onEditSelectedSupplier() {
+        Supplier s = (Supplier) cbSupplier.getSelectedItem();
+        if (s == null || s.getSupplierId() <= 0) {
+            UIHelper.showWarning(this, "Please select a vendor from the dropdown to edit/change name.");
+            return;
+        }
+        SupplierDialog dlg = new SupplierDialog(this, purchaseService, s);
+        dlg.setVisible(true);
+        if (dlg.isSaved()) {
+            loadSuppliersDropdown(s.getSupplierId());
+        }
+    }
+
+    private void onAddNewProduct() {
+        ProductDialog dlg = new ProductDialog((Frame) getOwner(), inventoryService, null);
+        dlg.setVisible(true);
+        if (dlg.isSaved()) {
+            try {
+                List<Product> products = inventoryService.getAllProducts();
+                if (!products.isEmpty()) {
+                    Product latest = products.get(products.size() - 1);
+                    loadProductsDropdown(latest.getItemId());
+                } else {
+                    loadProductsDropdown(0);
+                }
+            } catch (Exception e) {
+                loadProductsDropdown(0);
+            }
         }
     }
 

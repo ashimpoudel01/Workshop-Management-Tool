@@ -129,9 +129,7 @@ public class CustomerDialog extends JDialog {
             return;
         }
         if (phone.isEmpty()) {
-            UIHelper.showWarning(this, "Customer Phone number is required!");
-            txtPhone.requestFocus();
-            return;
+            phone = "-";
         }
 
         try {

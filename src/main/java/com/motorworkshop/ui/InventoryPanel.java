@@ -137,7 +137,7 @@ public class InventoryPanel extends JPanel {
         add(topContainer, BorderLayout.NORTH);
 
         // Center Table
-        String[] columns = {"ID", "Part / Item Name", "Part No", "Category", "Brand", "Buy Rate", "Retail Rate", "Workshop Rate", "Current Stock", "Min Stock", "Unit", "Total Value", "Status"};
+        String[] columns = {"S.N.", "Part / Item Name", "Part No", "Category", "Brand", "Buy Rate", "Retail Rate", "Workshop Rate", "Current Stock", "Min Stock", "Unit", "Total Value", "Status"};
         tableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int row, int col) { return false; }
         };
@@ -215,6 +215,7 @@ public class InventoryPanel extends JPanel {
                 tableModel.setRowCount(0);
 
                 double totalValuation = 0.0;
+                int sn = 1;
                 for (Product p : currentProductList) {
                     double val = p.getTotalStockValue();
                     totalValuation += val;
@@ -224,7 +225,7 @@ public class InventoryPanel extends JPanel {
                     else if (p.isLowStock()) status = "Low Stock";
 
                     tableModel.addRow(new Object[]{
-                            p.getItemId(),
+                            sn++,
                             p.getPartName(),
                             p.getPartNumber() != null ? p.getPartNumber() : "-",
                             p.getCategoryName() != null ? p.getCategoryName() : "-",

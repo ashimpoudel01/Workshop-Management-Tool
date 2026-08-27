@@ -136,7 +136,7 @@ public class ExpensePanel extends JPanel {
         add(topContainer, BorderLayout.NORTH);
 
         // Table
-        String[] cols = {"ID", "Date", "Category", "Description / Title", "Amount (Rs.)", "Payment Method", "Notes"};
+        String[] cols = {"S.N.", "Date", "Category", "Description / Title", "Amount (Rs.)", "Payment Method", "Notes"};
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -169,10 +169,11 @@ public class ExpensePanel extends JPanel {
                 tableModel.setRowCount(0);
 
                 double total = 0.0;
+                int sn = 1;
                 for (Expense exp : currentExpenseList) {
                     total += exp.getAmount();
                     tableModel.addRow(new Object[]{
-                            exp.getExpenseId(),
+                            sn++,
                             exp.getDate(),
                             exp.getCategory(),
                             exp.getDescription(),

@@ -32,6 +32,37 @@ public class SupplierDAO {
         return list;
     }
 
+    public List<Supplier> searchSuppliers(String query) throws SQLException {
+        if (query == null || query.trim().isEmpty()) {
+            return getAllSuppliers();
+        }
+        List<Supplier> list = new ArrayList<>();
+        String sql = "SELECT supplier_id, name, phone, email, address, notes FROM suppliers " +
+                     "WHERE (name LIKE ? OR phone LIKE ? OR email LIKE ? OR address LIKE ?) " +
+                     "ORDER BY name ASC";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            String pattern = "%" + query.trim() + "%";
+            pstmt.setString(1, pattern);
+            pstmt.setString(2, pattern);
+            pstmt.setString(3, pattern);
+            pstmt.setString(4, pattern);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new Supplier(
+                            rs.getInt("supplier_id"),
+                            rs.getString("name"),
+                            rs.getString("phone"),
+                            rs.getString("email"),
+                            rs.getString("address"),
+                            rs.getString("notes")
+                    ));
+                }
+            }
+        }
+        return list;
+    }
+
     public Supplier getSupplierById(int id) throws SQLException {
         String sql = "SELECT supplier_id, name, phone, email, address, notes FROM suppliers WHERE supplier_id = ?";
         try (Connection conn = DatabaseManager.getConnection();

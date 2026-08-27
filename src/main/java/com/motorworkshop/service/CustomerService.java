@@ -30,10 +30,63 @@ public class CustomerService {
             throw new IllegalArgumentException("Customer name is required!");
         }
         if (c.getPhone() == null || c.getPhone().trim().isEmpty()) {
-            throw new IllegalArgumentException("Phone number is required!");
+            c.setPhone("-");
         }
-        c.setCreatedAt(DateUtil.today());
+        if (c.getCreatedAt() == null || c.getCreatedAt().trim().isEmpty()) {
+            c.setCreatedAt(DateUtil.today());
+        }
         return customerDAO.insertCustomer(c);
+    }
+
+    public Customer findOrCreateCustomer(String name, String phone, String brand, String model, String regNo) throws SQLException {
+        if (name == null || name.trim().isEmpty()) {
+            name = "Walk-in Customer";
+        }
+        name = name.trim();
+        phone = phone != null ? phone.trim() : "";
+
+        Customer existing = null;
+        if (!phone.isEmpty() && !"-".equals(phone)) {
+            existing = customerDAO.findCustomerByPhone(phone);
+        }
+        if (existing == null && !name.equalsIgnoreCase("Walk-in Customer")) {
+            existing = customerDAO.findCustomerByName(name);
+        }
+
+        if (existing != null) {
+            boolean changed = false;
+            if ((existing.getPhone() == null || existing.getPhone().equals("-") || existing.getPhone().isEmpty()) && !phone.isEmpty()) {
+                existing.setPhone(phone);
+                changed = true;
+            }
+            if ((existing.getVehicleBrand() == null || existing.getVehicleBrand().isEmpty()) && brand != null && !brand.trim().isEmpty()) {
+                existing.setVehicleBrand(brand.trim());
+                changed = true;
+            }
+            if ((existing.getVehicleModel() == null || existing.getVehicleModel().isEmpty()) && model != null && !model.trim().isEmpty()) {
+                existing.setVehicleModel(model.trim());
+                changed = true;
+            }
+            if ((existing.getVehicleNumber() == null || existing.getVehicleNumber().isEmpty()) && regNo != null && !regNo.trim().isEmpty()) {
+                existing.setVehicleNumber(regNo.trim());
+                changed = true;
+            }
+            if (changed) {
+                customerDAO.updateCustomer(existing);
+            }
+            return existing;
+        }
+
+        Customer c = new Customer();
+        c.setName(name);
+        c.setPhone(!phone.isEmpty() ? phone : "-");
+        c.setVehicleBrand(brand != null ? brand.trim() : "");
+        c.setVehicleModel(model != null ? model.trim() : "");
+        c.setVehicleNumber(regNo != null ? regNo.trim() : "");
+        c.setNotes("Recorded from Job Card on " + DateUtil.today());
+        c.setCreatedAt(DateUtil.today());
+        customerDAO.insertCustomer(c);
+        return c;
     }
 
     public boolean updateCustomer(Customer c) throws SQLException {

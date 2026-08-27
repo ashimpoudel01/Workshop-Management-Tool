@@ -283,6 +283,28 @@ public class SchemaInitializer {
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone);");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_customers_veh ON customers(vehicle_number);");
 
+            // Backfill and repair parts_total, service_charge, and COGS for any sales missing them
+            stmt.executeUpdate(
+                    "UPDATE sales SET " +
+                    "parts_total = COALESCE((SELECT SUM(total_price) FROM sale_items WHERE sale_items.sale_id = sales.sale_id AND (UPPER(sale_items.item_type) = 'PART' OR UPPER(sale_items.item_type) = 'PRODUCT')), 0.0), " +
+                    "service_charge = COALESCE((SELECT SUM(total_price) FROM sale_items WHERE sale_items.sale_id = sales.sale_id AND (UPPER(sale_items.item_type) = 'SERVICE' OR UPPER(sale_items.item_type) = 'LABOR')), 0.0) " +
+                    "WHERE (parts_total = 0.0 AND service_charge = 0.0) OR subtotal = 0.0;"
+            );
+
+            stmt.executeUpdate(
+                    "UPDATE sales SET " +
+                    "subtotal = parts_total + service_charge, " +
+                    "total_amount = MAX(0.0, (parts_total + service_charge) - discount) " +
+                    "WHERE subtotal = 0.0 AND (parts_total > 0.0 OR service_charge > 0.0);"
+            );
+
+            stmt.executeUpdate(
+                    "UPDATE sales SET " +
+                    "total_cogs = COALESCE((SELECT SUM(total_cost) FROM sale_items WHERE sale_items.sale_id = sales.sale_id AND (UPPER(sale_items.item_type) = 'PART' OR UPPER(sale_items.item_type) = 'PRODUCT')), 0.0), " +
+                    "gross_profit = total_amount - COALESCE((SELECT SUM(total_cost) FROM sale_items WHERE sale_items.sale_id = sales.sale_id AND (UPPER(sale_items.item_type) = 'PART' OR UPPER(sale_items.item_type) = 'PRODUCT')), 0.0) " +
+                    "WHERE total_cogs = 0.0 AND gross_profit = 0.0 AND total_amount > 0.0;"
+            );
+
         } catch (SQLException e) {
             System.err.println("Error initializing SQLite schema: " + e.getMessage());
             e.printStackTrace();

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Full-featured Sales & Workshop Job Card Billing Dialog.
+ * Full-featured Sales & Workshop Job Card Billing Dialog with clean GridBag alignment.
  */
 public class NewSaleDialog extends JDialog {
     private final SaleService saleService;
@@ -76,7 +76,7 @@ public class NewSaleDialog extends JDialog {
     public NewSaleDialog(Frame owner, SaleService saleService, InventoryService inventoryService,
                          PricingService pricingService, CustomerService customerService,
                          SettingService settingService) {
-        super(owner, "Create New Sales / Workshop Invoice", true);
+        super(owner, "Create New Sales / Workshop Job Card Invoice", true);
         this.saleService = saleService;
         this.inventoryService = inventoryService;
         this.pricingService = pricingService;
@@ -85,29 +85,33 @@ public class NewSaleDialog extends JDialog {
 
         initComponents();
         loadDropdownData();
-        setSize(1000, 720);
+        setSize(1180, 780);
+        setMinimumSize(new Dimension(1020, 660));
+        setResizable(true);
         setLocationRelativeTo(owner);
     }
 
     private void initComponents() {
-        JPanel contentPane = new JPanel(new BorderLayout(10, 10));
-        contentPane.setBorder(new EmptyBorder(12, 16, 12, 16));
-        contentPane.setBackground(UIHelper.CARD_BG);
+        JPanel contentPane = new JPanel(new BorderLayout(12, 12));
+        contentPane.setBorder(new EmptyBorder(14, 16, 14, 16));
+        contentPane.setBackground(UIHelper.BG_LIGHT);
 
-        // Header Title
+        // 1. Top Header
         JPanel topHeader = new JPanel(new BorderLayout());
-        topHeader.setBackground(UIHelper.CARD_BG);
-        JLabel lblTitle = new JLabel("New Sales Invoice & Workshop Job Card");
-        lblTitle.setFont(UIHelper.FONT_HEADER);
+        topHeader.setBackground(UIHelper.BG_LIGHT);
+        
+        JLabel lblTitle = new JLabel("New Sales Invoice & Job Card Billing");
+        lblTitle.setFont(UIHelper.FONT_TITLE);
         lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
         topHeader.add(lblTitle, BorderLayout.WEST);
 
         txtInvoiceNo = new JTextField(saleService.generateNextInvoiceNumber(), 12);
         txtInvoiceNo.setEditable(false);
+        txtInvoiceNo.setFont(UIHelper.FONT_BOLD);
         txtDate = new JTextField(DateUtil.today(), 10);
 
-        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        headerRight.setBackground(UIHelper.CARD_BG);
+        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        headerRight.setBackground(UIHelper.BG_LIGHT);
         headerRight.add(new JLabel("Invoice No:"));
         headerRight.add(txtInvoiceNo);
         headerRight.add(new JLabel("Date:"));
@@ -116,20 +120,34 @@ public class NewSaleDialog extends JDialog {
 
         contentPane.add(topHeader, BorderLayout.NORTH);
 
-        // Main Center Panel (Split into Left: Customer & Items, Right: Summary & Calculation)
-        JPanel centerGrid = new JPanel(new BorderLayout(10, 10));
-        centerGrid.setBackground(UIHelper.CARD_BG);
+        // 2. Main Content Center Split (Left: Details & Items, Right: Billing Summary)
+        JPanel mainCenter = new JPanel(new BorderLayout(12, 12));
+        mainCenter.setBackground(UIHelper.BG_LIGHT);
 
-        // Left Container
-        JPanel leftContainer = new JPanel(new BorderLayout(8, 8));
-        leftContainer.setBackground(UIHelper.CARD_BG);
+        // Left Container (Vertical Flow: Customer details -> Add Items panel -> Table)
+        JPanel leftPanel = new JPanel(new BorderLayout(8, 8));
+        leftPanel.setBackground(UIHelper.BG_LIGHT);
 
-        // 1. Customer & Vehicle Box
-        JPanel custBox = new JPanel(new GridLayout(3, 4, 6, 6));
-        custBox.setBackground(UIHelper.CARD_BG);
+        // Upper Section: Customer Details + Add Service / Parts Rows
+        JPanel upperLeft = new JPanel();
+        upperLeft.setLayout(new BoxLayout(upperLeft, BoxLayout.Y_AXIS));
+        upperLeft.setBackground(UIHelper.BG_LIGHT);
+
+        // A. Customer & Vehicle Box
+        JPanel custBox = UIHelper.createCard();
+        custBox.setLayout(new GridLayout(3, 4, 8, 8));
         custBox.setBorder(new TitledBorder("Customer & Vehicle Details"));
 
         cbCustomer = new JComboBox<>();
+        JPanel customerSelectPanel = new JPanel(new BorderLayout(4, 0));
+        customerSelectPanel.setBackground(UIHelper.CARD_BG);
+        customerSelectPanel.add(cbCustomer, BorderLayout.CENTER);
+        JButton btnAddCust = UIHelper.createSuccessButton("+");
+        btnAddCust.setToolTipText("Add New Customer Profile");
+        btnAddCust.setPreferredSize(new Dimension(36, 26));
+        btnAddCust.addActionListener(e -> onAddNewCustomer());
+        customerSelectPanel.add(btnAddCust, BorderLayout.EAST);
+
         txtCustomerName = new JTextField("Walk-in Customer", 12);
         txtCustomerPhone = new JTextField(10);
         cbVehicleType = new JComboBox<>(new String[]{"Motorcycle", "Scooter", "Moped", "Other"});
@@ -140,7 +158,7 @@ public class NewSaleDialog extends JDialog {
         cbCustomer.addActionListener(e -> onCustomerSelected());
 
         custBox.add(new JLabel("Existing Customer:"));
-        custBox.add(cbCustomer);
+        custBox.add(customerSelectPanel);
         custBox.add(new JLabel("Customer Name *:"));
         custBox.add(txtCustomerName);
 
@@ -153,26 +171,38 @@ public class NewSaleDialog extends JDialog {
         JPanel brandModel = new JPanel(new GridLayout(1, 2, 4, 4));
         brandModel.setBackground(UIHelper.CARD_BG);
         brandModel.add(txtVehicleBrand);
-        brandModel.add(txtModelField());
+        brandModel.add(txtVehicleModel);
         custBox.add(brandModel);
 
-        custBox.add(new JLabel("Vehicle Plate No:"));
+        custBox.add(new JLabel("Plate / Reg No:"));
         custBox.add(txtVehicleRegNo);
 
-        leftContainer.add(custBox, BorderLayout.NORTH);
+        upperLeft.add(custBox);
+        upperLeft.add(Box.createRigidArea(new Dimension(0, 6)));
 
-        // 2. Add Service & Parts Bar
-        JPanel addItemsPanel = new JPanel(new GridLayout(2, 1, 6, 6));
-        addItemsPanel.setBackground(UIHelper.CARD_BG);
+        // B. Add Service Row (GridBagLayout for reliable alignment)
+        JPanel serviceCard = UIHelper.createCard();
+        serviceCard.setLayout(new GridBagLayout());
+        serviceCard.setBorder(new TitledBorder("Add Workshop Service / Labor"));
 
-        // Service row
-        JPanel serviceRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        serviceRow.setBackground(UIHelper.CARD_BG);
-        serviceRow.setBorder(new TitledBorder("Add Workshop Service"));
+        GridBagConstraints gbcS = new GridBagConstraints();
+        gbcS.insets = new Insets(4, 4, 4, 4);
+        gbcS.fill = GridBagConstraints.HORIZONTAL;
+
         cbService = new JComboBox<>();
-        cbService.setPreferredSize(new Dimension(280, 26));
+        JButton btnCreateService = UIHelper.createSuccessButton("+ New");
+        btnCreateService.setToolTipText("Create new workshop service directly");
+        btnCreateService.setPreferredSize(new Dimension(65, 30));
+        btnCreateService.addActionListener(e -> onAddNewService());
+
+        JPanel serviceSelectPanel = new JPanel(new BorderLayout(4, 0));
+        serviceSelectPanel.setBackground(UIHelper.CARD_BG);
+        serviceSelectPanel.add(cbService, BorderLayout.CENTER);
+        serviceSelectPanel.add(btnCreateService, BorderLayout.EAST);
+
         txtServicePrice = new JTextField("0.00", 8);
         btnAddService = UIHelper.createPrimaryButton("+ Add Service");
+        btnAddService.setPreferredSize(new Dimension(130, 32));
         btnAddService.addActionListener(e -> onAddService());
 
         cbService.addActionListener(e -> {
@@ -182,25 +212,53 @@ public class NewSaleDialog extends JDialog {
             }
         });
 
-        serviceRow.add(new JLabel("Service:"));
-        serviceRow.add(cbService);
-        serviceRow.add(new JLabel("Charge (Rs.):"));
-        serviceRow.add(txtServicePrice);
-        serviceRow.add(btnAddService);
-        addItemsPanel.add(serviceRow);
+        gbcS.gridx = 0; gbcS.gridy = 0; gbcS.weightx = 0;
+        serviceCard.add(new JLabel("Service:"), gbcS);
 
-        // Part row
-        JPanel partRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 2));
-        partRow.setBackground(UIHelper.CARD_BG);
-        partRow.setBorder(new TitledBorder("Add Spare Part / Consumable"));
+        gbcS.gridx = 1; gbcS.gridy = 0; gbcS.weightx = 1.0;
+        serviceCard.add(serviceSelectPanel, gbcS);
+
+        gbcS.gridx = 2; gbcS.gridy = 0; gbcS.weightx = 0;
+        serviceCard.add(new JLabel("Fee (Rs.):"), gbcS);
+
+        gbcS.gridx = 3; gbcS.gridy = 0; gbcS.weightx = 0;
+        serviceCard.add(txtServicePrice, gbcS);
+
+        gbcS.gridx = 4; gbcS.gridy = 0; gbcS.weightx = 0;
+        serviceCard.add(btnAddService, gbcS);
+
+        upperLeft.add(serviceCard);
+        upperLeft.add(Box.createRigidArea(new Dimension(0, 6)));
+
+        // C. Add Part Row (GridBagLayout for reliable alignment)
+        JPanel partCard = UIHelper.createCard();
+        partCard.setLayout(new GridBagLayout());
+        partCard.setBorder(new TitledBorder("Add Spare Part / Consumable"));
+
+        GridBagConstraints gbcP = new GridBagConstraints();
+        gbcP.insets = new Insets(4, 4, 4, 4);
+        gbcP.fill = GridBagConstraints.HORIZONTAL;
+
         cbProduct = new JComboBox<>();
-        cbProduct.setPreferredSize(new Dimension(260, 26));
+        JButton btnCreatePart = UIHelper.createSuccessButton("+ New Part");
+        btnCreatePart.setToolTipText("Add new spare part directly to inventory from Job Card");
+        btnCreatePart.setPreferredSize(new Dimension(95, 30));
+        btnCreatePart.addActionListener(e -> onAddNewPart());
+
+        JPanel productSelectPanel = new JPanel(new BorderLayout(4, 0));
+        productSelectPanel.setBackground(UIHelper.CARD_BG);
+        productSelectPanel.add(cbProduct, BorderLayout.CENTER);
+        productSelectPanel.add(btnCreatePart, BorderLayout.EAST);
+
         txtPartQty = new JTextField("1", 4);
         txtPartPrice = new JTextField("0.00", 7);
-        lblAvailableStock = new JLabel("Stock: 0");
+        lblAvailableStock = new JLabel("Stock: 0 Pcs");
         lblAvailableStock.setFont(UIHelper.FONT_BOLD);
         lblAvailableStock.setForeground(UIHelper.INFO_COLOR);
+        lblAvailableStock.setPreferredSize(new Dimension(110, 24));
+
         btnAddPart = UIHelper.createPrimaryButton("+ Add Part");
+        btnAddPart.setPreferredSize(new Dimension(130, 32));
         btnAddPart.addActionListener(e -> onAddPart());
 
         cbProduct.addActionListener(e -> {
@@ -218,20 +276,36 @@ public class NewSaleDialog extends JDialog {
             }
         });
 
-        partRow.add(new JLabel("Part:"));
-        partRow.add(cbProduct);
-        partRow.add(new JLabel("Qty:"));
-        partRow.add(txtPartQty);
-        partRow.add(new JLabel("Rate:"));
-        partRow.add(txtPartPrice);
-        partRow.add(lblAvailableStock);
-        partRow.add(btnAddPart);
-        addItemsPanel.add(partRow);
+        gbcP.gridx = 0; gbcP.gridy = 0; gbcP.weightx = 0;
+        partCard.add(new JLabel("Part:"), gbcP);
 
-        leftContainer.add(addItemsPanel, BorderLayout.CENTER);
+        gbcP.gridx = 1; gbcP.gridy = 0; gbcP.weightx = 1.0;
+        partCard.add(productSelectPanel, gbcP);
 
-        // 3. Invoice Table
-        String[] cols = {"SN", "Type", "Description", "Qty", "Rate (Rs.)", "Total (Rs.)"};
+        gbcP.gridx = 2; gbcP.gridy = 0; gbcP.weightx = 0;
+        partCard.add(new JLabel("Qty:"), gbcP);
+
+        gbcP.gridx = 3; gbcP.gridy = 0; gbcP.weightx = 0;
+        partCard.add(txtPartQty, gbcP);
+
+        gbcP.gridx = 4; gbcP.gridy = 0; gbcP.weightx = 0;
+        partCard.add(new JLabel("Rate:"), gbcP);
+
+        gbcP.gridx = 5; gbcP.gridy = 0; gbcP.weightx = 0;
+        partCard.add(txtPartPrice, gbcP);
+
+        gbcP.gridx = 6; gbcP.gridy = 0; gbcP.weightx = 0;
+        partCard.add(lblAvailableStock, gbcP);
+
+        gbcP.gridx = 7; gbcP.gridy = 0; gbcP.weightx = 0;
+        partCard.add(btnAddPart, gbcP);
+
+        upperLeft.add(partCard);
+
+        leftPanel.add(upperLeft, BorderLayout.NORTH);
+
+        // D. Invoice Items Table
+        String[] cols = {"SN", "Type", "Description / Item Name", "Qty", "Unit Rate (Rs.)", "Total Price (Rs.)"};
         tableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -241,31 +315,29 @@ public class NewSaleDialog extends JDialog {
         itemsTable = new JTable(tableModel);
         UIHelper.styleTable(itemsTable);
         JScrollPane scrollTable = new JScrollPane(itemsTable);
-        scrollTable.setPreferredSize(new Dimension(550, 180));
 
-        JPanel tableWrapper = new JPanel(new BorderLayout(4, 4));
-        tableWrapper.setBackground(UIHelper.CARD_BG);
-        tableWrapper.add(scrollTable, BorderLayout.CENTER);
+        JPanel tableCard = UIHelper.createCard();
+        tableCard.setLayout(new BorderLayout(6, 6));
+        tableCard.setBorder(new TitledBorder("Invoice Items"));
+        tableCard.add(scrollTable, BorderLayout.CENTER);
 
-        JButton btnRemoveLine = UIHelper.createDangerButton("Remove Item");
+        JPanel tableActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        tableActions.setBackground(UIHelper.CARD_BG);
+        JButton btnRemoveLine = UIHelper.createDangerButton("Remove Selected Item");
         btnRemoveLine.addActionListener(e -> onRemoveLineItem());
-        tableWrapper.add(btnRemoveLine, BorderLayout.WEST);
+        tableActions.add(btnRemoveLine);
+        tableCard.add(tableActions, BorderLayout.SOUTH);
 
-        // Add tableWrapper to bottom of left container
-        JPanel leftCombined = new JPanel(new BorderLayout(6, 6));
-        leftCombined.setBackground(UIHelper.CARD_BG);
-        leftCombined.add(leftContainer, BorderLayout.NORTH);
-        leftCombined.add(tableWrapper, BorderLayout.CENTER);
-
-        centerGrid.add(leftCombined, BorderLayout.CENTER);
+        leftPanel.add(tableCard, BorderLayout.CENTER);
+        mainCenter.add(leftPanel, BorderLayout.CENTER);
 
         // Right Summary Panel
-        JPanel rightSummary = new JPanel(new BorderLayout(10, 10));
-        rightSummary.setPreferredSize(new Dimension(280, 400));
-        rightSummary.setBackground(UIHelper.CARD_BG);
+        JPanel rightSummary = UIHelper.createCard();
+        rightSummary.setLayout(new BorderLayout(10, 10));
+        rightSummary.setPreferredSize(new Dimension(300, 500));
         rightSummary.setBorder(new TitledBorder("Payment & Billing Summary"));
 
-        JPanel summaryForm = new JPanel(new GridLayout(8, 2, 6, 8));
+        JPanel summaryForm = new JPanel(new GridLayout(8, 2, 6, 12));
         summaryForm.setBackground(UIHelper.CARD_BG);
 
         lblPartsTotal = new JLabel("Rs. 0.00");
@@ -303,19 +375,21 @@ public class NewSaleDialog extends JDialog {
         summaryForm.add(cbPaymentMethod);
         summaryForm.add(new JLabel("Est. Profit:"));
         summaryForm.add(lblProfitInfo);
-        summaryForm.add(new JLabel("Remarks:"));
+        summaryForm.add(new JLabel("Remarks / Notes:"));
         summaryForm.add(txtNotes);
 
         rightSummary.add(summaryForm, BorderLayout.NORTH);
 
         // Action Buttons on Right
-        JPanel actionButtons = new JPanel(new GridLayout(3, 1, 6, 6));
+        JPanel actionButtons = new JPanel(new GridLayout(3, 1, 8, 8));
         actionButtons.setBackground(UIHelper.CARD_BG);
 
         JButton btnSaveAndPrint = UIHelper.createSuccessButton("Save & Print Invoice");
+        btnSaveAndPrint.setPreferredSize(new Dimension(260, 38));
         btnSaveAndPrint.addActionListener(e -> onSave(true));
 
         JButton btnSaveOnly = UIHelper.createPrimaryButton("Save Invoice Only");
+        btnSaveOnly.setPreferredSize(new Dimension(260, 36));
         btnSaveOnly.addActionListener(e -> onSave(false));
 
         JButton btnCancel = UIHelper.createSecondaryButton("Cancel");
@@ -326,45 +400,139 @@ public class NewSaleDialog extends JDialog {
         actionButtons.add(btnCancel);
 
         rightSummary.add(actionButtons, BorderLayout.SOUTH);
+        mainCenter.add(rightSummary, BorderLayout.EAST);
 
-        centerGrid.add(rightSummary, BorderLayout.EAST);
-        contentPane.add(centerGrid, BorderLayout.CENTER);
-
+        contentPane.add(mainCenter, BorderLayout.CENTER);
         setContentPane(contentPane);
     }
 
-    private JTextField txtModelField() {
-        return txtVehicleModel;
+    private void loadDropdownData() {
+        loadCustomersDropdown(0);
+        loadServicesDropdown(0);
+        loadProductsDropdown(0);
     }
 
-    private void loadDropdownData() {
+    private void loadCustomersDropdown(int selectCustomerId) {
         try {
-            // Load Customers
+            cbCustomer.removeAllItems();
             List<Customer> customers = customerService.getAllCustomers();
             Customer walkIn = new Customer();
             walkIn.setCustomerId(0);
             walkIn.setName("-- Select Existing Customer --");
             cbCustomer.addItem(walkIn);
-            for (Customer c : customers) cbCustomer.addItem(c);
+            Customer toSelect = null;
+            for (Customer c : customers) {
+                cbCustomer.addItem(c);
+                if (selectCustomerId > 0 && c.getCustomerId() == selectCustomerId) {
+                    toSelect = c;
+                }
+            }
+            if (toSelect != null) {
+                cbCustomer.setSelectedItem(toSelect);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-            // Load Services
+    private void loadServicesDropdown(int selectServiceId) {
+        try {
+            cbService.removeAllItems();
             List<ServiceItem> services = pricingService.getAllServices(true);
             ServiceItem sPlace = new ServiceItem();
             sPlace.setServiceId(0);
             sPlace.setServiceName("-- Select Workshop Service --");
             cbService.addItem(sPlace);
-            for (ServiceItem s : services) cbService.addItem(s);
+            ServiceItem toSelect = null;
+            for (ServiceItem s : services) {
+                cbService.addItem(s);
+                if (selectServiceId > 0 && s.getServiceId() == selectServiceId) {
+                    toSelect = s;
+                }
+            }
+            if (toSelect != null) {
+                cbService.setSelectedItem(toSelect);
+                txtServicePrice.setText(String.valueOf(toSelect.getDefaultPrice()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-            // Load Products
+    private void loadProductsDropdown(int selectProductId) {
+        try {
+            cbProduct.removeAllItems();
             List<Product> products = inventoryService.getAllProducts();
             Product pPlace = new Product();
             pPlace.setItemId(0);
             pPlace.setPartName("-- Select Spare Part --");
             cbProduct.addItem(pPlace);
-            for (Product p : products) cbProduct.addItem(p);
-
+            Product toSelect = null;
+            for (Product p : products) {
+                cbProduct.addItem(p);
+                if (selectProductId > 0 && p.getItemId() == selectProductId) {
+                    toSelect = p;
+                }
+            }
+            if (toSelect != null) {
+                cbProduct.setSelectedItem(toSelect);
+                txtPartPrice.setText(String.valueOf(toSelect.getSellingPrice()));
+                lblAvailableStock.setText("Stock: " + toSelect.getCurrentQuantity() + " " + toSelect.getUnit());
+            }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void onAddNewCustomer() {
+        CustomerDialog dlg = new CustomerDialog((Frame) getOwner(), customerService, null);
+        dlg.setVisible(true);
+        if (dlg.isSaved()) {
+            try {
+                List<Customer> list = customerService.getAllCustomers();
+                if (!list.isEmpty()) {
+                    loadCustomersDropdown(list.get(list.size() - 1).getCustomerId());
+                } else {
+                    loadCustomersDropdown(0);
+                }
+            } catch (Exception e) {
+                loadCustomersDropdown(0);
+            }
+        }
+    }
+
+    private void onAddNewService() {
+        ServiceDialog dlg = new ServiceDialog((Frame) getOwner(), pricingService, null);
+        dlg.setVisible(true);
+        if (dlg.isSaved()) {
+            try {
+                List<ServiceItem> list = pricingService.getAllServices(true);
+                if (!list.isEmpty()) {
+                    loadServicesDropdown(list.get(list.size() - 1).getServiceId());
+                } else {
+                    loadServicesDropdown(0);
+                }
+            } catch (Exception e) {
+                loadServicesDropdown(0);
+            }
+        }
+    }
+
+    private void onAddNewPart() {
+        ProductDialog dlg = new ProductDialog((Frame) getOwner(), inventoryService, null);
+        dlg.setVisible(true);
+        if (dlg.isSaved()) {
+            try {
+                List<Product> list = inventoryService.getAllProducts();
+                if (!list.isEmpty()) {
+                    Product latest = list.get(list.size() - 1);
+                    loadProductsDropdown(latest.getItemId());
+                } else {
+                    loadProductsDropdown(0);
+                }
+            } catch (Exception e) {
+                loadProductsDropdown(0);
+            }
         }
     }
 
@@ -372,7 +540,7 @@ public class NewSaleDialog extends JDialog {
         Customer c = (Customer) cbCustomer.getSelectedItem();
         if (c != null && c.getCustomerId() > 0) {
             txtCustomerName.setText(c.getName());
-            txtCustomerPhone.setText(c.getPhone() != null ? c.getPhone() : "");
+            txtCustomerPhone.setText(c.getPhone() != null && !c.getPhone().equals("-") ? c.getPhone() : "");
             if (c.getVehicleBrand() != null && !c.getVehicleBrand().isEmpty()) txtVehicleBrand.setText(c.getVehicleBrand());
             if (c.getVehicleModel() != null && !c.getVehicleModel().isEmpty()) txtVehicleModel.setText(c.getVehicleModel());
             if (c.getVehicleNumber() != null && !c.getVehicleNumber().isEmpty()) txtVehicleRegNo.setText(c.getVehicleNumber());
@@ -494,17 +662,33 @@ public class NewSaleDialog extends JDialog {
 
         Customer selectedCust = (Customer) cbCustomer.getSelectedItem();
         int custId = selectedCust != null ? selectedCust.getCustomerId() : 0;
+        String phone = txtCustomerPhone.getText().trim();
+        String brand = txtVehicleBrand.getText().trim();
+        String model = txtVehicleModel.getText().trim();
+        String regNo = txtVehicleRegNo.getText().trim();
+
+        // Always record walk-in / newly entered customer into Customer Details table
+        if (custId <= 0) {
+            try {
+                Customer recordedCust = customerService.findOrCreateCustomer(custName, phone, brand, model, regNo);
+                if (recordedCust != null) {
+                    custId = recordedCust.getCustomerId();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         Sale sale = new Sale();
         sale.setInvoiceNumber(txtInvoiceNo.getText().trim());
         sale.setDate(txtDate.getText().trim());
         sale.setCustomerId(custId);
         sale.setCustomerName(custName);
-        sale.setCustomerPhone(txtCustomerPhone.getText().trim());
+        sale.setCustomerPhone(phone.isEmpty() ? "-" : phone);
         sale.setVehicleType((String) cbVehicleType.getSelectedItem());
-        sale.setVehicleBrand(txtVehicleBrand.getText().trim());
-        sale.setVehicleModel(txtVehicleModel.getText().trim());
-        sale.setVehicleRegNo(txtVehicleRegNo.getText().trim());
+        sale.setVehicleBrand(brand);
+        sale.setVehicleModel(model);
+        sale.setVehicleRegNo(regNo);
         sale.setPaymentMethod((String) cbPaymentMethod.getSelectedItem());
         sale.setNotes(txtNotes.getText().trim());
         sale.setDiscount(FormatUtil.parseDouble(txtDiscount.getText(), 0.0));

@@ -8,6 +8,8 @@ import java.util.List;
  */
 public class DashboardStats {
     private double todaySales;
+    private double todayPartsRevenue;
+    private double todayServiceRevenue;
     private double todayExpenses;
     private double todayPurchases;
     private double todayCogs;
@@ -21,6 +23,8 @@ public class DashboardStats {
     private int outOfStockCount;
 
     private double monthlySales;
+    private double monthlyPartsRevenue;
+    private double monthlyServiceRevenue;
     private double monthlyExpenses;
     private double monthlyPurchases;
     private double monthlyGrossProfit;
@@ -31,6 +35,38 @@ public class DashboardStats {
     private List<TopItemMetric> topPerformingServices = new ArrayList<>();
 
     public DashboardStats() {}
+
+    public double getTodayPartsRevenue() {
+        return todayPartsRevenue;
+    }
+
+    public void setTodayPartsRevenue(double todayPartsRevenue) {
+        this.todayPartsRevenue = todayPartsRevenue;
+    }
+
+    public double getTodayServiceRevenue() {
+        return todayServiceRevenue;
+    }
+
+    public void setTodayServiceRevenue(double todayServiceRevenue) {
+        this.todayServiceRevenue = todayServiceRevenue;
+    }
+
+    public double getMonthlyPartsRevenue() {
+        return monthlyPartsRevenue;
+    }
+
+    public void setMonthlyPartsRevenue(double monthlyPartsRevenue) {
+        this.monthlyPartsRevenue = monthlyPartsRevenue;
+    }
+
+    public double getMonthlyServiceRevenue() {
+        return monthlyServiceRevenue;
+    }
+
+    public void setMonthlyServiceRevenue(double monthlyServiceRevenue) {
+        this.monthlyServiceRevenue = monthlyServiceRevenue;
+    }
 
     public double getTodaySales() {
         return todaySales;
