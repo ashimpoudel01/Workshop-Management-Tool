@@ -22,6 +22,8 @@ public class Sale {
     private double discount;
     private double subtotal;          // serviceCharge + partsTotal
     private double totalAmount;       // subtotal - discount
+    private double paidAmount;
+    private double dueAmount;
     private double totalCogs;         // Cost of goods sold for all parts
     private double grossProfit;       // totalAmount - totalCogs
     private String paymentMethod;     // Cash, Bank, eSewa, Khalti, Other
@@ -248,4 +250,8 @@ public class Sale {
         this.totalCogs = cogsSum;
         this.grossProfit = this.totalAmount - this.totalCogs;
     }
+    public double getPaidAmount() { return paidAmount; }
+    public void setPaidAmount(double paidAmount) { this.paidAmount = paidAmount; }
+    public double getDueAmount() { return dueAmount; }
+    public void setDueAmount(double dueAmount) { this.dueAmount = dueAmount; }
 }

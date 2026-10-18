@@ -35,10 +35,8 @@ public class InvoicePreviewDialog extends JDialog {
         // Header controls
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBackground(UIHelper.CARD_BG);
-        JLabel lblTitle = new JLabel("Invoice / Receipt Preview (" + sale.getInvoiceNumber() + ")");
-        lblTitle.setFont(UIHelper.FONT_HEADER);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        topBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("Invoice & Receipt Preview", "Tax invoice for " + sale.getInvoiceNumber() + " • Ready to print");
+        topBar.add(titleGroup, BorderLayout.WEST);
 
         contentPane.add(topBar, BorderLayout.NORTH);
 
@@ -57,7 +55,7 @@ public class InvoicePreviewDialog extends JDialog {
         JPanel bottomBar = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         bottomBar.setBackground(UIHelper.CARD_BG);
 
-        JButton btnPrint = UIHelper.createSuccessButton("Print Invoice");
+        JButton btnPrint = UIHelper.createSuccessButton("🖨️  Print Invoice");
         btnPrint.addActionListener(e -> InvoicePrinter.printInvoice(editorPane));
 
         JButton btnClose = UIHelper.createSecondaryButton("Close");

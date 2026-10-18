@@ -49,10 +49,11 @@ public class ProductDialog extends JDialog {
         contentPane.setBackground(UIHelper.CARD_BG);
 
         // Header Title
-        JLabel lblHeader = new JLabel(productToEdit == null ? "Add New Inventory Item" : "Edit Item Details");
-        lblHeader.setFont(UIHelper.FONT_HEADER);
-        lblHeader.setForeground(UIHelper.PRIMARY_COLOR);
-        contentPane.add(lblHeader, BorderLayout.NORTH);
+        JPanel header = UIHelper.createSectionHeader(
+                productToEdit == null ? "Add New Spare Part" : "Edit Part Details",
+                "Enter item specifications, pricing rates, supplier, and stock threshold"
+        );
+        contentPane.add(header, BorderLayout.NORTH);
 
         // Form fields in 2 columns
         JPanel formPanel = new JPanel(new GridBagLayout());
@@ -125,7 +126,7 @@ public class ProductDialog extends JDialog {
         JButton btnCancel = UIHelper.createSecondaryButton("Cancel");
         btnCancel.addActionListener(e -> dispose());
 
-        JButton btnSave = UIHelper.createPrimaryButton(productToEdit == null ? "Save Part" : "Update Part");
+        JButton btnSave = UIHelper.createSuccessButton(productToEdit == null ? "💾  Save Part" : "💾  Update Part");
         btnSave.addActionListener(e -> onSave());
 
         btnPanel.add(btnCancel);

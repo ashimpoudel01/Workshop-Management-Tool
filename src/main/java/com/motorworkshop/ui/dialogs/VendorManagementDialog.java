@@ -48,21 +48,19 @@ public class VendorManagementDialog extends JDialog {
         JPanel headerBar = new JPanel(new BorderLayout());
         headerBar.setBackground(UIHelper.BG_LIGHT);
 
-        JLabel lblTitle = new JLabel("Vendors & Suppliers Directory");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        headerBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("Vendors & Suppliers Directory", "Manage parts suppliers, distributor contact details, and payment records");
+        headerBar.add(titleGroup, BorderLayout.WEST);
 
-        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        actionBtns.setBackground(UIHelper.BG_LIGHT);
+        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actionBtns.setOpaque(false);
 
         JButton btnAdd = UIHelper.createSuccessButton("+ Add Vendor");
         btnAdd.addActionListener(e -> onAddVendor());
 
-        JButton btnEdit = UIHelper.createPrimaryButton("Edit / Change Vendor");
+        JButton btnEdit = UIHelper.createPrimaryButton("✏️  Edit Vendor");
         btnEdit.addActionListener(e -> onEditVendor());
 
-        JButton btnDelete = UIHelper.createDangerButton("Delete Vendor");
+        JButton btnDelete = UIHelper.createDangerButton("🗑️  Delete");
         btnDelete.addActionListener(e -> onDeleteVendor());
 
         actionBtns.add(btnAdd);

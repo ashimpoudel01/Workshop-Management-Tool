@@ -62,30 +62,28 @@ public class InventoryPanel extends JPanel {
         JPanel headerBar = new JPanel(new BorderLayout());
         headerBar.setBackground(UIHelper.BG_LIGHT);
 
-        JLabel lblTitle = new JLabel("Parts & Inventory Stock Management");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        headerBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("Parts & Inventory Stock", "Track spare parts, current stock levels, reorder alerts, and valuations");
+        headerBar.add(titleGroup, BorderLayout.WEST);
 
-        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        actionBtns.setBackground(UIHelper.BG_LIGHT);
+        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actionBtns.setOpaque(false);
 
-        JButton btnAdd = UIHelper.createSuccessButton("+ Add Item");
+        JButton btnAdd = UIHelper.createSuccessButton("+ Add Part");
         btnAdd.addActionListener(e -> onAddItem());
 
-        JButton btnEdit = UIHelper.createPrimaryButton("Edit Item");
+        JButton btnEdit = UIHelper.createPrimaryButton("✏️  Edit Part");
         btnEdit.addActionListener(e -> onEditItem());
 
-        JButton btnAdjust = UIHelper.createSecondaryButton("Adjust Stock");
+        JButton btnAdjust = UIHelper.createSecondaryButton("⚖️  Adjust Stock");
         btnAdjust.addActionListener(e -> onAdjustStock());
 
-        JButton btnHistory = UIHelper.createSecondaryButton("Stock Audit Trail");
+        JButton btnHistory = UIHelper.createSecondaryButton("📜  Audit Trail");
         btnHistory.addActionListener(e -> onStockHistory());
 
-        JButton btnDelete = UIHelper.createDangerButton("Delete");
+        JButton btnDelete = UIHelper.createDangerButton("🗑️  Delete");
         btnDelete.addActionListener(e -> onDeleteItem());
 
-        JButton btnExport = UIHelper.createSecondaryButton("Export CSV");
+        JButton btnExport = UIHelper.createSecondaryButton("📥  Export CSV");
         btnExport.addActionListener(e -> CsvExporter.exportTableToCsv(this, productTable, "inventory_stock"));
 
         actionBtns.add(btnAdd);
@@ -145,7 +143,7 @@ public class InventoryPanel extends JPanel {
         productTable = new JTable(tableModel);
         UIHelper.styleTable(productTable);
 
-        // Custom renderer for Status column
+        // Custom renderer for Status column with soft badges
         productTable.getColumnModel().getColumn(12).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -153,13 +151,22 @@ public class InventoryPanel extends JPanel {
                 c.setHorizontalAlignment(JLabel.CENTER);
                 c.setFont(UIHelper.FONT_BOLD);
                 String val = value != null ? value.toString() : "";
-                if ("Out of Stock".equalsIgnoreCase(val)) {
-                    c.setForeground(UIHelper.DANGER_COLOR);
-                } else if ("Low Stock".equalsIgnoreCase(val)) {
-                    c.setForeground(UIHelper.WARNING_COLOR);
+                if (!isSelected) {
+                    if ("Out of Stock".equalsIgnoreCase(val)) {
+                        c.setForeground(UIHelper.DANGER_COLOR);
+                        c.setBackground(new Color(254, 242, 242));
+                    } else if ("Low Stock".equalsIgnoreCase(val)) {
+                        c.setForeground(UIHelper.WARNING_COLOR);
+                        c.setBackground(new Color(254, 249, 195));
+                    } else {
+                        c.setForeground(UIHelper.SUCCESS_COLOR);
+                        c.setBackground(row % 2 == 0 ? Color.WHITE : UIHelper.TABLE_ROW_ALT);
+                    }
                 } else {
-                    c.setForeground(UIHelper.SUCCESS_COLOR);
+                    c.setBackground(UIHelper.TABLE_SELECTION_BG);
+                    c.setForeground(UIHelper.TEXT_DARK);
                 }
+                c.setBorder(new EmptyBorder(0, 6, 0, 6));
                 return c;
             }
         });

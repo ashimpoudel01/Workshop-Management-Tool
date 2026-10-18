@@ -56,10 +56,8 @@ public class PricingPanel extends JPanel {
         JPanel headerBar = new JPanel(new BorderLayout());
         headerBar.setBackground(UIHelper.BG_LIGHT);
 
-        JLabel lblTitle = new JLabel("Pricing Strategy & Service Rate Card");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        headerBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("Pricing & Labor Rates", "Configure spare part margins, selling prices, and standard workshop labor rates");
+        headerBar.add(titleGroup, BorderLayout.WEST);
 
         add(headerBar, BorderLayout.NORTH);
 
@@ -97,16 +95,16 @@ public class PricingPanel extends JPanel {
         searchBox.add(txtSearchParts);
         toolbar.add(searchBox, BorderLayout.WEST);
 
-        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        actionBtns.setBackground(UIHelper.CARD_BG);
+        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actionBtns.setOpaque(false);
 
-        JButton btnUpdatePrices = UIHelper.createPrimaryButton("Update Selling Prices");
+        JButton btnUpdatePrices = UIHelper.createPrimaryButton("✏️  Update Selling Prices");
         btnUpdatePrices.addActionListener(e -> onUpdatePartPricing());
 
-        JButton btnViewHistory = UIHelper.createSecondaryButton("Price Change History");
+        JButton btnViewHistory = UIHelper.createSecondaryButton("📜  Price Change History");
         btnViewHistory.addActionListener(e -> onViewPriceHistory());
 
-        JButton btnExport = UIHelper.createSecondaryButton("Export CSV");
+        JButton btnExport = UIHelper.createSecondaryButton("📥  Export CSV");
         btnExport.addActionListener(e -> CsvExporter.exportTableToCsv(this, partsTable, "parts_pricing_margins"));
 
         actionBtns.add(btnUpdatePrices);
@@ -142,16 +140,16 @@ public class PricingPanel extends JPanel {
         lblSub.setFont(UIHelper.FONT_SUBHEADER);
         toolbar.add(lblSub, BorderLayout.WEST);
 
-        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        actionBtns.setBackground(UIHelper.CARD_BG);
+        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actionBtns.setOpaque(false);
 
-        JButton btnAddService = UIHelper.createSuccessButton("+ Add New Service");
+        JButton btnAddService = UIHelper.createSuccessButton("+ Add Service");
         btnAddService.addActionListener(e -> onAddService());
 
-        JButton btnEditService = UIHelper.createPrimaryButton("Edit Service Rate");
+        JButton btnEditService = UIHelper.createPrimaryButton("✏️  Edit Rate");
         btnEditService.addActionListener(e -> onEditService());
 
-        JButton btnDeleteService = UIHelper.createDangerButton("Deactivate Service");
+        JButton btnDeleteService = UIHelper.createDangerButton("🗑️  Deactivate");
         btnDeleteService.addActionListener(e -> onDeleteService());
 
         actionBtns.add(btnAddService);

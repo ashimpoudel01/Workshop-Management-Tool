@@ -3,10 +3,9 @@ package com.motorworkshop.service;
 import com.motorworkshop.database.DatabaseManager;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.Statement;
 
@@ -45,7 +44,11 @@ public class BackupRestoreService {
         }
 
         copyFile(backupFile, currentDb);
-        DatabaseManager.initializeDatabase();
+        try {
+            DatabaseManager.initializeDatabase();
+        } catch (Exception e) {
+            throw new IOException("Restored database could not be initialized", e);
+        }
         return true;
     }
 
@@ -53,9 +56,6 @@ public class BackupRestoreService {
         if (dest.getParentFile() != null && !dest.getParentFile().exists()) {
             dest.getParentFile().mkdirs();
         }
-        try (FileChannel sourceChannel = new FileInputStream(source).getChannel();
-             FileChannel destChannel = new FileOutputStream(dest).getChannel()) {
-            destChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
-        }
+        Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 }

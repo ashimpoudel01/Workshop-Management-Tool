@@ -17,6 +17,7 @@ public class CustomerDAO {
         String sql = "SELECT c.*, " +
                      "(SELECT COUNT(*) FROM sales s WHERE s.customer_id = c.customer_id) as total_visits, " +
                      "(SELECT COALESCE(SUM(s.total_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_spent, " +
+                     "(SELECT COALESCE(SUM(s.due_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_due, " +
                      "(SELECT MAX(s.date) FROM sales s WHERE s.customer_id = c.customer_id) as last_visit " +
                      "FROM customers c " +
                      "ORDER BY c.name ASC";
@@ -35,6 +36,7 @@ public class CustomerDAO {
         String sql = "SELECT c.*, " +
                      "(SELECT COUNT(*) FROM sales s WHERE s.customer_id = c.customer_id) as total_visits, " +
                      "(SELECT COALESCE(SUM(s.total_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_spent, " +
+                     "(SELECT COALESCE(SUM(s.due_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_due, " +
                      "(SELECT MAX(s.date) FROM sales s WHERE s.customer_id = c.customer_id) as last_visit " +
                      "FROM customers c " +
                      "WHERE c.customer_id = ?";
@@ -56,6 +58,7 @@ public class CustomerDAO {
         String sql = "SELECT c.*, " +
                      "(SELECT COUNT(*) FROM sales s WHERE s.customer_id = c.customer_id) as total_visits, " +
                      "(SELECT COALESCE(SUM(s.total_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_spent, " +
+                     "(SELECT COALESCE(SUM(s.due_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_due, " +
                      "(SELECT MAX(s.date) FROM sales s WHERE s.customer_id = c.customer_id) as last_visit " +
                      "FROM customers c " +
                      "WHERE (c.name LIKE ? OR c.phone LIKE ? OR c.vehicle_number LIKE ? OR c.vehicle_model LIKE ?) " +
@@ -85,6 +88,7 @@ public class CustomerDAO {
         String sql = "SELECT c.*, " +
                      "(SELECT COUNT(*) FROM sales s WHERE s.customer_id = c.customer_id) as total_visits, " +
                      "(SELECT COALESCE(SUM(s.total_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_spent, " +
+                     "(SELECT COALESCE(SUM(s.due_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_due, " +
                      "(SELECT MAX(s.date) FROM sales s WHERE s.customer_id = c.customer_id) as last_visit " +
                      "FROM customers c " +
                      "WHERE c.phone = ? LIMIT 1";
@@ -108,6 +112,7 @@ public class CustomerDAO {
         String sql = "SELECT c.*, " +
                      "(SELECT COUNT(*) FROM sales s WHERE s.customer_id = c.customer_id) as total_visits, " +
                      "(SELECT COALESCE(SUM(s.total_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_spent, " +
+                     "(SELECT COALESCE(SUM(s.due_amount), 0.0) FROM sales s WHERE s.customer_id = c.customer_id) as total_due, " +
                      "(SELECT MAX(s.date) FROM sales s WHERE s.customer_id = c.customer_id) as last_visit " +
                      "FROM customers c " +
                      "WHERE LOWER(c.name) = LOWER(?) LIMIT 1";
@@ -190,6 +195,7 @@ public class CustomerDAO {
         c.setCreatedAt(rs.getString("created_at"));
         c.setTotalVisits(rs.getInt("total_visits"));
         c.setTotalSpent(rs.getDouble("total_spent"));
+        c.setTotalDue(rs.getDouble("total_due"));
         c.setLastVisitDate(rs.getString("last_visit"));
         return c;
     }

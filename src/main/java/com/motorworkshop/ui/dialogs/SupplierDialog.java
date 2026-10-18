@@ -39,10 +39,11 @@ public class SupplierDialog extends JDialog {
         contentPane.setBorder(new EmptyBorder(18, 20, 18, 20));
         contentPane.setBackground(UIHelper.CARD_BG);
 
-        JLabel lblTitle = new JLabel(supplierToEdit == null ? "Add New Vendor / Supplier" : "Edit Vendor Details");
-        lblTitle.setFont(UIHelper.FONT_HEADER);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        contentPane.add(lblTitle, BorderLayout.NORTH);
+        JPanel header = UIHelper.createSectionHeader(
+                supplierToEdit == null ? "Add Parts Vendor" : "Edit Vendor Details",
+                "Vendor contact info, address, and payment terms"
+        );
+        contentPane.add(header, BorderLayout.NORTH);
 
         JPanel form = new JPanel(new GridBagLayout());
         form.setBackground(UIHelper.CARD_BG);
@@ -77,7 +78,7 @@ public class SupplierDialog extends JDialog {
         btnPanel.setBackground(UIHelper.CARD_BG);
         JButton btnCancel = UIHelper.createSecondaryButton("Cancel");
         btnCancel.addActionListener(e -> dispose());
-        JButton btnSave = UIHelper.createPrimaryButton(supplierToEdit == null ? "Save Vendor" : "Update Vendor");
+        JButton btnSave = UIHelper.createSuccessButton(supplierToEdit == null ? "💾  Save Vendor" : "💾  Update Vendor");
         btnSave.addActionListener(e -> onSave());
 
         btnPanel.add(btnCancel);

@@ -51,12 +51,12 @@ public class DatabaseManager {
         return conn;
     }
 
-    public static void initializeDatabase() {
+    public static void initializeDatabase() throws Exception {
         SchemaInitializer.initialize();
         DataSeeder.seedDefaultDataIfNeeded();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.out.println("==================================================");
         System.out.println("Initializing Motorcycle Workshop SQLite Database...");
         System.out.println("Database file path: " + getDatabaseFile().getAbsolutePath());

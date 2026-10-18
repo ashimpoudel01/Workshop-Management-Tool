@@ -41,10 +41,11 @@ public class ExpenseDialog extends JDialog {
         contentPane.setBorder(new EmptyBorder(18, 20, 18, 20));
         contentPane.setBackground(UIHelper.CARD_BG);
 
-        JLabel lblTitle = new JLabel(expenseToEdit == null ? "Record New Expense" : "Edit Expense");
-        lblTitle.setFont(UIHelper.FONT_HEADER);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        contentPane.add(lblTitle, BorderLayout.NORTH);
+        JPanel header = UIHelper.createSectionHeader(
+                expenseToEdit == null ? "Record Workshop Expense" : "Edit Expense",
+                "Log workshop operating costs, utility bills, and garage supplies"
+        );
+        contentPane.add(header, BorderLayout.NORTH);
 
         JPanel form = new JPanel(new GridLayout(6, 2, 8, 10));
         form.setBackground(UIHelper.CARD_BG);
@@ -76,7 +77,7 @@ public class ExpenseDialog extends JDialog {
         btnPanel.setBackground(UIHelper.CARD_BG);
         JButton btnCancel = UIHelper.createSecondaryButton("Cancel");
         btnCancel.addActionListener(e -> dispose());
-        JButton btnSave = UIHelper.createPrimaryButton(expenseToEdit == null ? "Save Expense" : "Update Expense");
+        JButton btnSave = UIHelper.createSuccessButton(expenseToEdit == null ? "💾  Save Expense" : "💾  Update Expense");
         btnSave.addActionListener(e -> onSave());
 
         btnPanel.add(btnCancel);

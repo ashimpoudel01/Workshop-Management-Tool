@@ -15,6 +15,17 @@ public class Main {
         // Set Look and Feel (FlatLaf or System default fallback)
         try {
             FlatLightLaf.setup();
+            UIManager.put("Button.arc", 6);
+            UIManager.put("Component.arc", 6);
+            UIManager.put("TextComponent.arc", 6);
+            UIManager.put("ScrollBar.thumbArc", 6);
+            UIManager.put("ScrollBar.width", 10);
+            UIManager.put("Table.showHorizontalLines", true);
+            UIManager.put("Table.showVerticalLines", false);
+            UIManager.put("TableHeader.height", 36);
+            UIManager.put("TabbedPane.showTabSeparators", true);
+            UIManager.put("TabbedPane.selectedBackground", java.awt.Color.WHITE);
+            UIManager.put("TabbedPane.tabAreaInsets", new java.awt.Insets(4, 6, 0, 6));
         } catch (Exception e) {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -30,6 +41,7 @@ public class Main {
                     "Database Startup Error",
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
+                    return;
         }
 
         // Launch UI on Event Dispatch Thread

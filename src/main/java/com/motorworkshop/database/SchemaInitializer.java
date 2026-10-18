@@ -9,7 +9,7 @@ import java.sql.Statement;
  */
 public class SchemaInitializer {
 
-    public static void initialize() {
+    public static void initialize() throws SQLException {
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement()) {
 
@@ -238,6 +238,8 @@ public class SchemaInitializer {
                     "discount REAL NOT NULL DEFAULT 0.0, " +
                     "subtotal REAL NOT NULL DEFAULT 0.0, " +
                     "total_amount REAL NOT NULL DEFAULT 0.0, " +
+                    "paid_amount REAL NOT NULL DEFAULT 0.0, " +
+                    "due_amount REAL NOT NULL DEFAULT 0.0, " +
                     "total_cogs REAL NOT NULL DEFAULT 0.0, " +
                     "gross_profit REAL NOT NULL DEFAULT 0.0, " +
                     "payment_method TEXT NOT NULL DEFAULT 'Cash', " +
@@ -284,6 +286,13 @@ public class SchemaInitializer {
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_customers_veh ON customers(vehicle_number);");
 
             // Backfill and repair parts_total, service_charge, and COGS for any sales missing them
+            try {
+                stmt.execute("ALTER TABLE sales ADD COLUMN paid_amount REAL NOT NULL DEFAULT 0.0");
+                stmt.execute("ALTER TABLE sales ADD COLUMN due_amount REAL NOT NULL DEFAULT 0.0");
+                stmt.executeUpdate("UPDATE sales SET paid_amount = total_amount, due_amount = 0.0");
+            } catch (SQLException ignore) {
+                // Column might already exist
+            }
             stmt.executeUpdate(
                     "UPDATE sales SET " +
                     "parts_total = COALESCE((SELECT SUM(total_price) FROM sale_items WHERE sale_items.sale_id = sales.sale_id AND (UPPER(sale_items.item_type) = 'PART' OR UPPER(sale_items.item_type) = 'PRODUCT')), 0.0), " +
@@ -306,8 +315,7 @@ public class SchemaInitializer {
             );
 
         } catch (SQLException e) {
-            System.err.println("Error initializing SQLite schema: " + e.getMessage());
-            e.printStackTrace();
+            throw new SQLException("Error initializing SQLite schema", e);
         }
     }
 }

@@ -71,24 +71,22 @@ public class SalesPanel extends JPanel {
         JPanel headerBar = new JPanel(new BorderLayout());
         headerBar.setBackground(UIHelper.BG_LIGHT);
 
-        JLabel lblTitle = new JLabel("Sales & Workshop Job Card Billing");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        headerBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("Sales & Job Cards", "Create invoices, record repair services, and track customer billing");
+        headerBar.add(titleGroup, BorderLayout.WEST);
 
-        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        actionBtns.setBackground(UIHelper.BG_LIGHT);
+        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actionBtns.setOpaque(false);
 
-        JButton btnNewSale = UIHelper.createSuccessButton("+ New Sale / Job Card");
+        JButton btnNewSale = UIHelper.createSuccessButton("+ New Job Card / Sale");
         btnNewSale.addActionListener(e -> openNewSale());
 
-        JButton btnPrint = UIHelper.createPrimaryButton("Print / View Invoice");
+        JButton btnPrint = UIHelper.createPrimaryButton("🖨️  Print / View Invoice");
         btnPrint.addActionListener(e -> onPrintInvoice());
 
-        JButton btnDelete = UIHelper.createDangerButton("Delete Invoice");
+        JButton btnDelete = UIHelper.createDangerButton("🗑️  Delete Invoice");
         btnDelete.addActionListener(e -> onDeleteInvoice());
 
-        JButton btnExport = UIHelper.createSecondaryButton("Export CSV");
+        JButton btnExport = UIHelper.createSecondaryButton("📥  Export CSV");
         btnExport.addActionListener(e -> CsvExporter.exportTableToCsv(this, salesTable, "sales_report"));
 
         actionBtns.add(btnNewSale);

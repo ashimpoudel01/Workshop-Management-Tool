@@ -29,7 +29,7 @@ target/MotorcycleWorkshop-1.0.0.jar
 Use the Java 25 runtime to start the app:
 
 ```bash
-/home/ashim-poudel/.jdk/jdk-25.0.2/bin/java -jar target/MotorcycleWorkshop-1.0.0.jar
+/home/ashim-poudel/.jdk/jdk-25.0.2/bin/java --enable-native-access=ALL-UNNAMED -jar target/MotorcycleWorkshop-1.0.0.jar
 ```
 
 If you prefer to use your own Java 25 installation, replace the path with your local `java` binary.
@@ -49,5 +49,5 @@ If you prefer to use your own Java 25 installation, replace the path with your l
 
 ```bash
 mvn clean package
-/home/ashim-poudel/.jdk/jdk-25.0.2/bin/java -jar target/MotorcycleWorkshop-1.0.0.jar
+/home/ashim-poudel/.jdk/jdk-25.0.2/bin/java --enable-native-access=ALL-UNNAMED -jar target/MotorcycleWorkshop-1.0.0.jar
 ```

@@ -12,7 +12,7 @@ import java.sql.Statement;
  */
 public class DataSeeder {
 
-    public static void seedDefaultDataIfNeeded() {
+    public static void seedDefaultDataIfNeeded() throws Exception {
         try (Connection conn = DatabaseManager.getConnection()) {
             // Check if settings table is empty
             try (Statement stmt = conn.createStatement();
@@ -61,10 +61,6 @@ public class DataSeeder {
                     seedCustomers(conn);
                 }
             }
-
-        } catch (Exception e) {
-            System.err.println("Error seeding default data: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 

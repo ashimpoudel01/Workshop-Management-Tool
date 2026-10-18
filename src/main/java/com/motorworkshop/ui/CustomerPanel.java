@@ -54,27 +54,25 @@ public class CustomerPanel extends JPanel {
         JPanel headerBar = new JPanel(new BorderLayout());
         headerBar.setBackground(UIHelper.BG_LIGHT);
 
-        JLabel lblTitle = new JLabel("Customer Profiles & Vehicle History");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        headerBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("Customer & Vehicle Directory", "Manage customer profiles, motorcycle models, registration numbers, and service history");
+        headerBar.add(titleGroup, BorderLayout.WEST);
 
-        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        actionBtns.setBackground(UIHelper.BG_LIGHT);
+        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actionBtns.setOpaque(false);
 
         JButton btnAdd = UIHelper.createSuccessButton("+ Add Customer");
         btnAdd.addActionListener(e -> onAddCustomer());
 
-        JButton btnEdit = UIHelper.createPrimaryButton("Edit Customer");
+        JButton btnEdit = UIHelper.createPrimaryButton("✏️  Edit Customer");
         btnEdit.addActionListener(e -> onEditCustomer());
 
-        JButton btnHistory = UIHelper.createSecondaryButton("Past Visits & Bills");
+        JButton btnHistory = UIHelper.createSecondaryButton("📜  Service History");
         btnHistory.addActionListener(e -> onViewCustomerHistory());
 
-        JButton btnDelete = UIHelper.createDangerButton("Delete");
+        JButton btnDelete = UIHelper.createDangerButton("🗑️  Delete");
         btnDelete.addActionListener(e -> onDeleteCustomer());
 
-        JButton btnExport = UIHelper.createSecondaryButton("Export CSV");
+        JButton btnExport = UIHelper.createSecondaryButton("📥  Export CSV");
         btnExport.addActionListener(e -> CsvExporter.exportTableToCsv(this, customerTable, "customer_profiles"));
 
         actionBtns.add(btnAdd);
@@ -105,7 +103,7 @@ public class CustomerPanel extends JPanel {
         add(topContainer, BorderLayout.NORTH);
 
         // Table
-        String[] cols = {"S.N.", "Name", "Phone Number", "Address", "Plate / Reg No", "Brand", "Model", "Total Visits", "Total Spent (Rs.)", "Last Visit"};
+        String[] cols = {"S.N.", "Name", "Phone Number", "Address", "Plate / Reg No", "Brand", "Model", "Total Visits", "Total Spent (Rs.)", "Credit Due (Rs.)", "Last Visit"};
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -143,6 +141,7 @@ public class CustomerPanel extends JPanel {
                             c.getVehicleModel() != null ? c.getVehicleModel() : "-",
                             c.getTotalVisits(),
                             FormatUtil.formatCurrencyPlain(c.getTotalSpent()),
+                            FormatUtil.formatCurrencyPlain(c.getTotalDue()),
                             c.getLastVisitDate() != null ? DateUtil.formatForDisplay(c.getLastVisitDate()) : "Never"
                     });
                 }

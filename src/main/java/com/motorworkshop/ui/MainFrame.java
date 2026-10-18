@@ -4,16 +4,27 @@ import com.motorworkshop.service.*;
 import com.motorworkshop.util.UIHelper;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Primary Application Window with a clean modern navigation sidebar, responsive card layout, and live view sync.
+ * Primary Application Window featuring a crafted, human-designed industrial workshop theme,
+ * tactile navigation sidebar, responsive card layout, and live view sync.
  */
 public class MainFrame extends JFrame {
+    private static final Color SIDEBAR_BG = new Color(30, 36, 46);
+    private static final Color SIDEBAR_BORDER = new Color(44, 53, 67);
+    private static final Color NAV_TEXT_DEFAULT = new Color(160, 174, 192);
+    private static final Color NAV_BG_ACTIVE = new Color(45, 55, 72);
+    private static final Color NAV_BG_HOVER = new Color(38, 47, 60);
+    private static final Color ACCENT_BAR = new Color(245, 158, 11); // Warm automotive amber
+
     private final SaleService saleService = new SaleService();
     private final InventoryService inventoryService = new InventoryService();
     private final PurchaseService purchaseService = new PurchaseService();
@@ -26,6 +37,7 @@ public class MainFrame extends JFrame {
     private CardLayout cardLayout;
     private JPanel mainContentPanel;
     private final Map<String, JButton> navButtons = new HashMap<>();
+    private String currentSection = "Dashboard";
 
     // Sub-panels
     private DashboardPanel dashboardPanel;
@@ -39,7 +51,7 @@ public class MainFrame extends JFrame {
     private SettingsPanel settingsPanel;
 
     public MainFrame() {
-        super("Motorcycle & Scooter Workshop Management System");
+        super("Motorcycle & Scooter Workshop Management Tool");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 800);
         setMinimumSize(new Dimension(1024, 680));
@@ -55,60 +67,87 @@ public class MainFrame extends JFrame {
 
         // 1. Left Sidebar Navigation
         JPanel sidebar = new JPanel(new BorderLayout());
-        sidebar.setPreferredSize(new Dimension(220, 800));
-        sidebar.setBackground(new Color(15, 23, 42)); // Dark slate navy
-        sidebar.setBorder(new MatteBorder(0, 0, 0, 1, new Color(30, 41, 59)));
+        sidebar.setPreferredSize(new Dimension(236, 800));
+        sidebar.setBackground(SIDEBAR_BG);
+        sidebar.setBorder(new MatteBorder(0, 0, 0, 1, SIDEBAR_BORDER));
 
         // Sidebar Brand Logo / Header
-        JPanel brandPanel = new JPanel(new BorderLayout(4, 4));
-        brandPanel.setBackground(new Color(15, 23, 42));
-        brandPanel.setBorder(new EmptyBorder(20, 16, 20, 16));
+        JPanel brandPanel = new JPanel(new BorderLayout(10, 0));
+        brandPanel.setBackground(SIDEBAR_BG);
+        brandPanel.setBorder(new EmptyBorder(18, 16, 18, 16));
+
+        // Workshop Icon Badge
+        JLabel lblBadge = new JLabel("⚙", SwingConstants.CENTER);
+        lblBadge.setFont(new Font("Segoe UI Emoji", Font.BOLD, 18));
+        lblBadge.setForeground(Color.WHITE);
+        lblBadge.setOpaque(true);
+        lblBadge.setBackground(new Color(234, 88, 12)); // Engine amber/orange
+        lblBadge.setPreferredSize(new Dimension(36, 36));
+        lblBadge.setBorder(new MatteBorder(1, 1, 1, 1, new Color(251, 146, 60)));
+
+        JPanel brandTextPanel = new JPanel(new GridLayout(2, 1, 0, 2));
+        brandTextPanel.setOpaque(false);
 
         JLabel lblBrand = new JLabel("MOTOR WORKSHOP");
-        lblBrand.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblBrand.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblBrand.setForeground(Color.WHITE);
 
-        JLabel lblSub = new JLabel("Management System v1.0");
-        lblSub.setFont(UIHelper.FONT_SMALL);
-        lblSub.setForeground(new Color(148, 163, 184));
+        JLabel lblSub = new JLabel("Garage Management Tool");
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblSub.setForeground(new Color(156, 163, 175));
 
-        brandPanel.add(lblBrand, BorderLayout.NORTH);
-        brandPanel.add(lblSub, BorderLayout.SOUTH);
+        brandTextPanel.add(lblBrand);
+        brandTextPanel.add(lblSub);
+
+        brandPanel.add(lblBadge, BorderLayout.WEST);
+        brandPanel.add(brandTextPanel, BorderLayout.CENTER);
         sidebar.add(brandPanel, BorderLayout.NORTH);
 
         // Nav Items list
         JPanel navList = new JPanel(new GridLayout(9, 1, 0, 4));
-        navList.setBackground(new Color(15, 23, 42));
+        navList.setBackground(SIDEBAR_BG);
         navList.setBorder(new EmptyBorder(10, 8, 10, 8));
 
-        String[] sections = {
-                "Dashboard",
-                "Sales",
-                "Purchases",
-                "Inventory",
-                "Expenses",
-                "Pricing",
-                "Customers",
-                "Reports",
-                "Settings"
+        String[][] sectionDefs = {
+                {"Dashboard", "📊   Dashboard"},
+                {"Sales", "🧾   Sales & Job Cards"},
+                {"Purchases", "🛒   Parts Purchases"},
+                {"Inventory", "📦   Parts & Inventory"},
+                {"Expenses", "💸   Workshop Expenses"},
+                {"Pricing", "🏷️   Pricing & Labor"},
+                {"Customers", "👥   Customer Directory"},
+                {"Reports", "📈   Financial Reports"},
+                {"Settings", "⚙️   System Settings"}
         };
 
-        for (String sec : sections) {
-            JButton btn = createNavButton(sec);
-            navButtons.put(sec, btn);
+        for (String[] def : sectionDefs) {
+            String secKey = def[0];
+            String secLabel = def[1];
+            JButton btn = createNavButton(secKey, secLabel);
+            navButtons.put(secKey, btn);
             navList.add(btn);
         }
 
         sidebar.add(navList, BorderLayout.CENTER);
 
         // Sidebar Footer
-        JPanel sidebarFooter = new JPanel(new BorderLayout());
-        sidebarFooter.setBackground(new Color(15, 23, 42));
-        sidebarFooter.setBorder(new EmptyBorder(12, 16, 12, 16));
-        JLabel lblStatus = new JLabel("Offline SQLite Ready");
-        lblStatus.setFont(UIHelper.FONT_SMALL);
-        lblStatus.setForeground(new Color(52, 211, 153)); // Emerald
-        sidebarFooter.add(lblStatus, BorderLayout.CENTER);
+        JPanel sidebarFooter = new JPanel(new GridLayout(2, 1, 0, 2));
+        sidebarFooter.setBackground(SIDEBAR_BG);
+        sidebarFooter.setBorder(new CompoundBorder(
+                new MatteBorder(1, 0, 0, 0, SIDEBAR_BORDER),
+                new EmptyBorder(12, 16, 12, 16)
+        ));
+
+        JLabel lblStatus = new JLabel("● Database Connected");
+        lblStatus.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblStatus.setForeground(new Color(34, 197, 94)); // Emerald green
+
+        JLabel lblVer = new JLabel("Local SQLite • v1.2 Ready");
+        lblVer.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblVer.setForeground(new Color(148, 163, 184));
+
+        sidebarFooter.add(lblStatus);
+        sidebarFooter.add(lblVer);
         sidebar.add(sidebarFooter, BorderLayout.SOUTH);
 
         rootPanel.add(sidebar, BorderLayout.WEST);
@@ -143,31 +182,64 @@ public class MainFrame extends JFrame {
         setContentPane(rootPanel);
     }
 
-    private JButton createNavButton(String name) {
-        JButton btn = new JButton(name);
-        btn.setFont(UIHelper.FONT_BOLD);
-        btn.setForeground(new Color(203, 213, 225));
-        btn.setBackground(new Color(15, 23, 42));
+    private JButton createNavButton(String key, String displayText) {
+        JButton btn = new JButton(displayText);
+        btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        btn.setForeground(NAV_TEXT_DEFAULT);
+        btn.setBackground(SIDEBAR_BG);
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setFocusPainted(false);
-        btn.setBorder(new EmptyBorder(10, 16, 10, 16));
+        btn.setBorder(new CompoundBorder(
+                new MatteBorder(0, 4, 0, 0, SIDEBAR_BG),
+                new EmptyBorder(9, 12, 9, 12)
+        ));
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        btn.addActionListener(e -> showSection(name));
+        btn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (!key.equalsIgnoreCase(currentSection)) {
+                    btn.setBackground(NAV_BG_HOVER);
+                    btn.setForeground(Color.WHITE);
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (!key.equalsIgnoreCase(currentSection)) {
+                    btn.setBackground(SIDEBAR_BG);
+                    btn.setForeground(NAV_TEXT_DEFAULT);
+                }
+            }
+        });
+
+        btn.addActionListener(e -> showSection(key));
         return btn;
     }
 
     public void showSection(String name) {
+        this.currentSection = name;
         cardLayout.show(mainContentPanel, name);
 
-        // Update button active states
+        // Update button active states with indicator bar and highlighted styling
         for (Map.Entry<String, JButton> entry : navButtons.entrySet()) {
+            JButton btn = entry.getValue();
             if (entry.getKey().equalsIgnoreCase(name)) {
-                entry.getValue().setBackground(UIHelper.PRIMARY_COLOR);
-                entry.getValue().setForeground(Color.WHITE);
+                btn.setBackground(NAV_BG_ACTIVE);
+                btn.setForeground(Color.WHITE);
+                btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                btn.setBorder(new CompoundBorder(
+                        new MatteBorder(0, 4, 0, 0, ACCENT_BAR),
+                        new EmptyBorder(9, 12, 9, 12)
+                ));
             } else {
-                entry.getValue().setBackground(new Color(15, 23, 42));
-                entry.getValue().setForeground(new Color(203, 213, 225));
+                btn.setBackground(SIDEBAR_BG);
+                btn.setForeground(NAV_TEXT_DEFAULT);
+                btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+                btn.setBorder(new CompoundBorder(
+                        new MatteBorder(0, 4, 0, 0, SIDEBAR_BG),
+                        new EmptyBorder(9, 12, 9, 12)
+                ));
             }
         }
 

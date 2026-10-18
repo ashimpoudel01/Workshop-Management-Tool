@@ -49,12 +49,10 @@ public class SettingsPanel extends JPanel {
         JPanel headerBar = new JPanel(new BorderLayout());
         headerBar.setBackground(UIHelper.BG_LIGHT);
 
-        JLabel lblTitle = new JLabel("Workshop Settings & Data Backup");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        headerBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("System Settings & Backup", "Configure workshop profile, invoice header details, and database backups");
+        headerBar.add(titleGroup, BorderLayout.WEST);
 
-        JButton btnSave = UIHelper.createSuccessButton("Save Settings");
+        JButton btnSave = UIHelper.createSuccessButton("💾  Save Settings");
         btnSave.addActionListener(e -> onSaveSettings());
         headerBar.add(btnSave, BorderLayout.EAST);
 

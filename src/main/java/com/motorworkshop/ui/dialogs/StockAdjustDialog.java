@@ -39,15 +39,10 @@ public class StockAdjustDialog extends JDialog {
         contentPane.setBackground(UIHelper.CARD_BG);
 
         // Header info
-        JPanel headerPanel = new JPanel(new GridLayout(2, 1, 4, 4));
-        headerPanel.setBackground(UIHelper.CARD_BG);
-        JLabel lblTitle = new JLabel("Adjust Inventory Stock");
-        lblTitle.setFont(UIHelper.FONT_HEADER);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        JLabel lblSub = new JLabel("Item: " + product.getPartName() + " | Current Stock: " + product.getCurrentQuantity() + " " + product.getUnit());
-        lblSub.setFont(UIHelper.FONT_BOLD);
-        headerPanel.add(lblTitle);
-        headerPanel.add(lblSub);
+        JPanel headerPanel = UIHelper.createSectionHeader(
+                "Adjust Inventory Stock",
+                "Part: " + product.getPartName() + " (Current Stock: " + product.getCurrentQuantity() + " " + product.getUnit() + ")"
+        );
         contentPane.add(headerPanel, BorderLayout.NORTH);
 
         // Form
@@ -80,7 +75,7 @@ public class StockAdjustDialog extends JDialog {
         btnPanel.setBackground(UIHelper.CARD_BG);
         JButton btnCancel = UIHelper.createSecondaryButton("Cancel");
         btnCancel.addActionListener(e -> dispose());
-        JButton btnApply = UIHelper.createPrimaryButton("Apply Adjustment");
+        JButton btnApply = UIHelper.createSuccessButton("⚖️  Apply Adjustment");
         btnApply.addActionListener(e -> onApply());
 
         btnPanel.add(btnCancel);

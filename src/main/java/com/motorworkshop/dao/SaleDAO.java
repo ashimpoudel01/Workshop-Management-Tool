@@ -182,8 +182,8 @@ public class SaleDAO {
             String sqlSale = "INSERT INTO sales (invoice_number, date, customer_id, customer_name, customer_phone, " +
                              "vehicle_type, vehicle_brand, vehicle_model, vehicle_reg_no, " +
                              "service_charge, parts_total, discount, subtotal, total_amount, " +
-                             "total_cogs, gross_profit, payment_method, notes) " +
-                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                             "paid_amount, due_amount, total_cogs, gross_profit, payment_method, notes) " +
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             int saleId;
             try (PreparedStatement pstmt = conn.prepareStatement(sqlSale, Statement.RETURN_GENERATED_KEYS)) {
                 pstmt.setString(1, sale.getInvoiceNumber());
@@ -200,10 +200,12 @@ public class SaleDAO {
                 pstmt.setDouble(12, sale.getDiscount());
                 pstmt.setDouble(13, sale.getSubtotal());
                 pstmt.setDouble(14, sale.getTotalAmount());
-                pstmt.setDouble(15, sale.getTotalCogs());
-                pstmt.setDouble(16, sale.getGrossProfit());
-                pstmt.setString(17, sale.getPaymentMethod());
-                pstmt.setString(18, sale.getNotes());
+                pstmt.setDouble(15, sale.getPaidAmount());
+                pstmt.setDouble(16, sale.getDueAmount());
+                pstmt.setDouble(17, sale.getTotalCogs());
+                pstmt.setDouble(18, sale.getGrossProfit());
+                pstmt.setString(19, sale.getPaymentMethod());
+                pstmt.setString(20, sale.getNotes());
                 pstmt.executeUpdate();
 
                 try (ResultSet keys = pstmt.getGeneratedKeys()) {
@@ -508,6 +510,8 @@ public class SaleDAO {
         s.setDiscount(rs.getDouble("discount"));
         s.setSubtotal(rs.getDouble("subtotal"));
         s.setTotalAmount(rs.getDouble("total_amount"));
+        s.setPaidAmount(rs.getDouble("paid_amount"));
+        s.setDueAmount(rs.getDouble("due_amount"));
         s.setTotalCogs(rs.getDouble("total_cogs"));
         s.setGrossProfit(rs.getDouble("gross_profit"));
         s.setPaymentMethod(rs.getString("payment_method"));

@@ -18,6 +18,7 @@ public class Customer {
     private int totalVisits;
     private double totalSpent;
     private String lastVisitDate;
+    private double totalDue;
 
     public Customer() {}
 
@@ -144,4 +145,6 @@ public class Customer {
     public String toString() {
         return name + " (" + (vehicleNumber != null && !vehicleNumber.isEmpty() ? vehicleNumber : phone) + ")";
     }
+    public double getTotalDue() { return totalDue; }
+    public void setTotalDue(double totalDue) { this.totalDue = totalDue; }
 }

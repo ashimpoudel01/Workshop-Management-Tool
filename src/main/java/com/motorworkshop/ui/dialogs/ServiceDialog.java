@@ -38,10 +38,11 @@ public class ServiceDialog extends JDialog {
         contentPane.setBorder(new EmptyBorder(18, 20, 18, 20));
         contentPane.setBackground(UIHelper.CARD_BG);
 
-        JLabel lblTitle = new JLabel(serviceToEdit == null ? "Define Workshop Service" : "Edit Service");
-        lblTitle.setFont(UIHelper.FONT_HEADER);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        contentPane.add(lblTitle, BorderLayout.NORTH);
+        JPanel header = UIHelper.createSectionHeader(
+                serviceToEdit == null ? "Define Workshop Service" : "Edit Service Rate",
+                "Service title, default labor charges, and estimated turnaround duration"
+        );
+        contentPane.add(header, BorderLayout.NORTH);
 
         JPanel form = new JPanel(new GridLayout(4, 2, 8, 10));
         form.setBackground(UIHelper.CARD_BG);
@@ -67,7 +68,7 @@ public class ServiceDialog extends JDialog {
         btnPanel.setBackground(UIHelper.CARD_BG);
         JButton btnCancel = UIHelper.createSecondaryButton("Cancel");
         btnCancel.addActionListener(e -> dispose());
-        JButton btnSave = UIHelper.createPrimaryButton(serviceToEdit == null ? "Save Service" : "Update Service");
+        JButton btnSave = UIHelper.createSuccessButton(serviceToEdit == null ? "💾  Save Service" : "💾  Update Service");
         btnSave.addActionListener(e -> onSave());
 
         btnPanel.add(btnCancel);

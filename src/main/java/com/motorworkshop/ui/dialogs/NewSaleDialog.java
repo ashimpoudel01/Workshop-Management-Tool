@@ -68,6 +68,8 @@ public class NewSaleDialog extends JDialog {
     private JLabel lblServiceTotal;
     private JLabel lblSubtotal;
     private JTextField txtDiscount;
+    private JTextField txtPaidAmount;
+    private JLabel lblDueAmount;
     private JLabel lblGrandTotal;
     private JLabel lblProfitInfo;
     private JComboBox<String> cbPaymentMethod;
@@ -100,10 +102,8 @@ public class NewSaleDialog extends JDialog {
         JPanel topHeader = new JPanel(new BorderLayout());
         topHeader.setBackground(UIHelper.BG_LIGHT);
         
-        JLabel lblTitle = new JLabel("New Sales Invoice & Job Card Billing");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        topHeader.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("New Sales Invoice & Job Card", "Customer and vehicle details, labor charges, and spare parts billing");
+        topHeader.add(titleGroup, BorderLayout.WEST);
 
         txtInvoiceNo = new JTextField(saleService.generateNextInvoiceNumber(), 12);
         txtInvoiceNo.setEditable(false);
@@ -337,13 +337,16 @@ public class NewSaleDialog extends JDialog {
         rightSummary.setPreferredSize(new Dimension(300, 500));
         rightSummary.setBorder(new TitledBorder("Payment & Billing Summary"));
 
-        JPanel summaryForm = new JPanel(new GridLayout(8, 2, 6, 12));
+        JPanel summaryForm = new JPanel(new GridLayout(10, 2, 6, 12));
         summaryForm.setBackground(UIHelper.CARD_BG);
 
         lblPartsTotal = new JLabel("Rs. 0.00");
         lblServiceTotal = new JLabel("Rs. 0.00");
         lblSubtotal = new JLabel("Rs. 0.00");
         txtDiscount = new JTextField("0.00", 8);
+        txtPaidAmount = new JTextField("0.00", 8);
+        lblDueAmount = new JLabel("Rs. 0.00");
+        lblDueAmount.setForeground(java.awt.Color.RED);
         lblGrandTotal = new JLabel("Rs. 0.00");
         lblGrandTotal.setFont(UIHelper.FONT_BIG_NUMBER);
         lblGrandTotal.setForeground(UIHelper.PRIMARY_COLOR);
@@ -355,6 +358,11 @@ public class NewSaleDialog extends JDialog {
         cbPaymentMethod = new JComboBox<>(new String[]{"Cash", "Bank", "eSewa", "Khalti", "Other"});
         txtNotes = new JTextField(12);
 
+        txtPaidAmount.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { recalculate(); }
+            public void removeUpdate(DocumentEvent e) { recalculate(); }
+            public void changedUpdate(DocumentEvent e) { recalculate(); }
+        });
         txtDiscount.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { recalculate(); }
             public void removeUpdate(DocumentEvent e) { recalculate(); }
@@ -371,6 +379,10 @@ public class NewSaleDialog extends JDialog {
         summaryForm.add(txtDiscount);
         summaryForm.add(new JLabel("Net Payable:"));
         summaryForm.add(lblGrandTotal);
+        summaryForm.add(new JLabel("Paid Amount (Rs.):"));
+        summaryForm.add(txtPaidAmount);
+        summaryForm.add(new JLabel("Due Amount (Rs.):"));
+        summaryForm.add(lblDueAmount);
         summaryForm.add(new JLabel("Payment Mode:"));
         summaryForm.add(cbPaymentMethod);
         summaryForm.add(new JLabel("Est. Profit:"));
@@ -384,11 +396,11 @@ public class NewSaleDialog extends JDialog {
         JPanel actionButtons = new JPanel(new GridLayout(3, 1, 8, 8));
         actionButtons.setBackground(UIHelper.CARD_BG);
 
-        JButton btnSaveAndPrint = UIHelper.createSuccessButton("Save & Print Invoice");
+        JButton btnSaveAndPrint = UIHelper.createSuccessButton("💾🖨️  Save & Print Invoice");
         btnSaveAndPrint.setPreferredSize(new Dimension(260, 38));
         btnSaveAndPrint.addActionListener(e -> onSave(true));
 
-        JButton btnSaveOnly = UIHelper.createPrimaryButton("Save Invoice Only");
+        JButton btnSaveOnly = UIHelper.createPrimaryButton("💾  Save Invoice Only");
         btnSaveOnly.setPreferredSize(new Dimension(260, 36));
         btnSaveOnly.addActionListener(e -> onSave(false));
 
@@ -641,6 +653,9 @@ public class NewSaleDialog extends JDialog {
 
         double subtotal = partsTotal + serviceTotal;
         double discount = FormatUtil.parseDouble(txtDiscount.getText(), 0.0);
+        double netPayable = Math.max(0.0, subtotal - discount);
+        double paidAmt = FormatUtil.parseDouble(txtPaidAmount.getText(), netPayable);
+        double dueAmt = Math.max(0.0, netPayable - paidAmt);
         double total = Math.max(0.0, subtotal - discount);
         double grossProfit = total - cogsTotal;
 
@@ -693,6 +708,10 @@ public class NewSaleDialog extends JDialog {
         sale.setNotes(txtNotes.getText().trim());
         sale.setDiscount(FormatUtil.parseDouble(txtDiscount.getText(), 0.0));
         sale.setItems(itemList);
+        double _tot = sale.getTotalAmount();
+        double _paid = FormatUtil.parseDouble(txtPaidAmount.getText(), _tot);
+        sale.setPaidAmount(_paid);
+        sale.setDueAmount(Math.max(0.0, _tot - _paid));
 
         try {
             saleService.createSale(sale);

@@ -54,24 +54,22 @@ public class ExpensePanel extends JPanel {
         JPanel headerBar = new JPanel(new BorderLayout());
         headerBar.setBackground(UIHelper.BG_LIGHT);
 
-        JLabel lblTitle = new JLabel("Daily Workshop Operating Expenses");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        headerBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("Workshop Expenses", "Record daily garage overheads, parts cost, utilities, and running expenses");
+        headerBar.add(titleGroup, BorderLayout.WEST);
 
-        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        actionBtns.setBackground(UIHelper.BG_LIGHT);
+        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actionBtns.setOpaque(false);
 
         JButton btnAdd = UIHelper.createSuccessButton("+ Record Expense");
         btnAdd.addActionListener(e -> onAddExpense());
 
-        JButton btnEdit = UIHelper.createPrimaryButton("Edit Expense");
+        JButton btnEdit = UIHelper.createPrimaryButton("✏️  Edit Expense");
         btnEdit.addActionListener(e -> onEditExpense());
 
-        JButton btnDelete = UIHelper.createDangerButton("Delete Expense");
+        JButton btnDelete = UIHelper.createDangerButton("🗑️  Delete Expense");
         btnDelete.addActionListener(e -> onDeleteExpense());
 
-        JButton btnExport = UIHelper.createSecondaryButton("Export CSV");
+        JButton btnExport = UIHelper.createSecondaryButton("📥  Export CSV");
         btnExport.addActionListener(e -> CsvExporter.exportTableToCsv(this, expenseTable, "expenses_report"));
 
         actionBtns.add(btnAdd);

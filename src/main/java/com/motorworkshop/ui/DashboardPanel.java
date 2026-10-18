@@ -6,10 +6,7 @@ import com.motorworkshop.util.FormatUtil;
 import com.motorworkshop.util.UIHelper;
 
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.function.Consumer;
@@ -49,8 +46,8 @@ public class DashboardPanel extends JPanel {
         this.openNewSaleCallback = openNewSaleCallback;
         this.openNewPurchaseCallback = openNewPurchaseCallback;
 
-        setLayout(new BorderLayout(15, 15));
-        setBorder(new EmptyBorder(15, 18, 15, 18));
+        setLayout(new BorderLayout(14, 14));
+        setBorder(new EmptyBorder(16, 20, 16, 20));
         setBackground(UIHelper.BG_LIGHT);
 
         initComponents();
@@ -60,14 +57,15 @@ public class DashboardPanel extends JPanel {
     private void initComponents() {
         // 1. Top Header Bar
         JPanel topHeader = new JPanel(new BorderLayout());
-        topHeader.setBackground(UIHelper.BG_LIGHT);
+        topHeader.setOpaque(false);
 
-        JLabel lblTitle = new JLabel("Workshop Overview & Live Dashboard");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        topHeader.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader(
+                "Workshop Dashboard",
+                "Today's financial metrics, quick garage actions, and monthly performance summary"
+        );
+        topHeader.add(titleGroup, BorderLayout.WEST);
 
-        JButton btnRefresh = UIHelper.createSecondaryButton("Refresh Data");
+        JButton btnRefresh = UIHelper.createSecondaryButton("🔄  Refresh Data");
         btnRefresh.addActionListener(e -> refreshData());
         topHeader.add(btnRefresh, BorderLayout.EAST);
 
@@ -76,12 +74,12 @@ public class DashboardPanel extends JPanel {
         // Center Scrollable Container
         JPanel centerContent = new JPanel();
         centerContent.setLayout(new BoxLayout(centerContent, BoxLayout.Y_AXIS));
-        centerContent.setBackground(UIHelper.BG_LIGHT);
+        centerContent.setOpaque(false);
 
         // A. Primary KPI Cards Grid (Row 1: Today's Metrics, Row 2: Inventory & Volume)
         JPanel kpiGrid = new JPanel(new GridLayout(2, 4, 12, 12));
-        kpiGrid.setBackground(UIHelper.BG_LIGHT);
-        kpiGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 170));
+        kpiGrid.setOpaque(false);
+        kpiGrid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 175));
 
         lblTodaySales = new JLabel("Rs. 0.00");
         lblTodayExpenses = new JLabel("Rs. 0.00");
@@ -92,48 +90,38 @@ public class DashboardPanel extends JPanel {
         lblLowStock = new JLabel("0 Items");
         lblTodayBills = new JLabel("0 Bills");
 
-        kpiGrid.add(createStatCard("Today's Sales", lblTodaySales, UIHelper.PRIMARY_COLOR, "Total revenue collected today"));
-        kpiGrid.add(createStatCard("Today's Gross Profit", lblTodayGrossProfit, UIHelper.SUCCESS_COLOR, "Sales - Cost of parts sold"));
-        kpiGrid.add(createStatCard("Today's Expenses", lblTodayExpenses, UIHelper.DANGER_COLOR, "Daily operating expenses"));
-        kpiGrid.add(createStatCard("Today's Net Profit", lblTodayNetProfit, new Color(16, 185, 129), "Gross Profit - Expenses"));
+        kpiGrid.add(UIHelper.createStatCard("Today's Sales", lblTodaySales, UIHelper.PRIMARY_COLOR, "Total revenue billed today"));
+        kpiGrid.add(UIHelper.createStatCard("Gross Profit", lblTodayGrossProfit, UIHelper.SUCCESS_COLOR, "Sales revenue - Part costs"));
+        kpiGrid.add(UIHelper.createStatCard("Today's Expenses", lblTodayExpenses, UIHelper.DANGER_COLOR, "Daily garage running costs"));
+        kpiGrid.add(UIHelper.createStatCard("Net Profit Today", lblTodayNetProfit, UIHelper.SUCCESS_COLOR, "Gross profit - Expenses"));
 
-        kpiGrid.add(createStatCard("Today's Purchases", lblTodayPurchases, UIHelper.SECONDARY_COLOR, "Supplier stock purchases"));
-        kpiGrid.add(createStatCard("Current Stock Value", lblInventoryValue, UIHelper.PRIMARY_COLOR, "Total cost value of inventory"));
-        kpiGrid.add(createStatCard("Low Stock Alert", lblLowStock, UIHelper.WARNING_COLOR, "Items below minimum threshold"));
-        kpiGrid.add(createStatCard("Services / Bills Today", lblTodayBills, UIHelper.INFO_COLOR, "Completed job cards & sales"));
+        kpiGrid.add(UIHelper.createStatCard("Today's Purchases", lblTodayPurchases, UIHelper.SECONDARY_COLOR, "Supplier stock inward"));
+        kpiGrid.add(UIHelper.createStatCard("Inventory Value", lblInventoryValue, UIHelper.INFO_COLOR, "Current stock valuation"));
+        kpiGrid.add(UIHelper.createStatCard("Low Stock Alert", lblLowStock, UIHelper.WARNING_COLOR, "Parts below minimum stock"));
+        kpiGrid.add(UIHelper.createStatCard("Completed Bills", lblTodayBills, UIHelper.INFO_COLOR, "Job cards completed today"));
 
         centerContent.add(kpiGrid);
-        centerContent.add(Box.createRigidArea(new Dimension(0, 15)));
+        centerContent.add(Box.createRigidArea(new Dimension(0, 14)));
 
         // B. Quick Action Buttons Grid
         JPanel quickActions = new JPanel(new GridLayout(1, 4, 12, 12));
-        quickActions.setBackground(UIHelper.BG_LIGHT);
-        quickActions.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        quickActions.setOpaque(false);
+        quickActions.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
 
-        JButton btnNewSale = new JButton("+ NEW SALE / JOB CARD");
-        btnNewSale.setFont(UIHelper.FONT_BOLD);
-        btnNewSale.setBackground(UIHelper.SUCCESS_COLOR);
-        btnNewSale.setForeground(Color.WHITE);
-        btnNewSale.setFocusPainted(false);
-        btnNewSale.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton btnNewSale = UIHelper.createSuccessButton("+ New Job Card / Sale");
         btnNewSale.addActionListener(e -> {
             if (openNewSaleCallback != null) openNewSaleCallback.run();
         });
 
-        JButton btnNewPurchase = new JButton("+ NEW PURCHASE");
-        btnNewPurchase.setFont(UIHelper.FONT_BOLD);
-        btnNewPurchase.setBackground(UIHelper.PRIMARY_COLOR);
-        btnNewPurchase.setForeground(Color.WHITE);
-        btnNewPurchase.setFocusPainted(false);
-        btnNewPurchase.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton btnNewPurchase = UIHelper.createPrimaryButton("+ New Parts Purchase");
         btnNewPurchase.addActionListener(e -> {
             if (openNewPurchaseCallback != null) openNewPurchaseCallback.run();
         });
 
-        JButton btnInventory = UIHelper.createSecondaryButton("INVENTORY");
+        JButton btnInventory = UIHelper.createSecondaryButton("📦  Manage Inventory");
         btnInventory.addActionListener(e -> navigationCallback.accept("Inventory"));
 
-        JButton btnReports = UIHelper.createSecondaryButton("REPORTS & PROFIT");
+        JButton btnReports = UIHelper.createSecondaryButton("📈  P&L Reports");
         btnReports.addActionListener(e -> navigationCallback.accept("Reports"));
 
         quickActions.add(btnNewSale);
@@ -142,18 +130,18 @@ public class DashboardPanel extends JPanel {
         quickActions.add(btnReports);
 
         centerContent.add(quickActions);
-        centerContent.add(Box.createRigidArea(new Dimension(0, 15)));
+        centerContent.add(Box.createRigidArea(new Dimension(0, 14)));
 
         // C. Bottom Row: Monthly Summary (Left) + Top Selling Parts & Services (Right)
         JPanel bottomRow = new JPanel(new GridLayout(1, 3, 14, 14));
-        bottomRow.setBackground(UIHelper.BG_LIGHT);
+        bottomRow.setOpaque(false);
 
         // 1. Monthly Performance Card
         JPanel monthCard = UIHelper.createCard();
         monthCard.setLayout(new BorderLayout(8, 8));
-        JLabel lblMonthTitle = new JLabel("This Month Performance");
+        JLabel lblMonthTitle = new JLabel("Monthly Performance");
         lblMonthTitle.setFont(UIHelper.FONT_SUBHEADER);
-        lblMonthTitle.setForeground(UIHelper.PRIMARY_COLOR);
+        lblMonthTitle.setForeground(UIHelper.TEXT_DARK);
         monthCard.add(lblMonthTitle, BorderLayout.NORTH);
 
         JPanel monthGrid = new JPanel(new GridLayout(5, 2, 6, 10));
@@ -167,15 +155,15 @@ public class DashboardPanel extends JPanel {
         lblMonthNetProfit.setForeground(UIHelper.SUCCESS_COLOR);
         lblAvgDailySales = new JLabel("Rs. 0.00");
 
-        monthGrid.add(new JLabel("Monthly Sales:"));
+        monthGrid.add(createFieldLabel("Monthly Sales:"));
         monthGrid.add(lblMonthSales);
-        monthGrid.add(new JLabel("Monthly Expenses:"));
+        monthGrid.add(createFieldLabel("Monthly Expenses:"));
         monthGrid.add(lblMonthExpenses);
-        monthGrid.add(new JLabel("Monthly Purchases:"));
+        monthGrid.add(createFieldLabel("Monthly Purchases:"));
         monthGrid.add(lblMonthPurchases);
-        monthGrid.add(new JLabel("Monthly Net Profit:"));
+        monthGrid.add(createFieldLabel("Monthly Net Profit:"));
         monthGrid.add(lblMonthNetProfit);
-        monthGrid.add(new JLabel("Avg Daily Sales:"));
+        monthGrid.add(createFieldLabel("Avg Daily Sales:"));
         monthGrid.add(lblAvgDailySales);
 
         monthCard.add(monthGrid, BorderLayout.CENTER);
@@ -186,7 +174,7 @@ public class DashboardPanel extends JPanel {
         topPartsCard.setLayout(new BorderLayout(6, 6));
         JLabel lblPartsTitle = new JLabel("Top 5 Selling Parts (This Month)");
         lblPartsTitle.setFont(UIHelper.FONT_SUBHEADER);
-        lblPartsTitle.setForeground(UIHelper.PRIMARY_COLOR);
+        lblPartsTitle.setForeground(UIHelper.TEXT_DARK);
         topPartsCard.add(lblPartsTitle, BorderLayout.NORTH);
 
         String[] partsCols = {"S.N.", "Part Name", "Qty", "Revenue"};
@@ -203,7 +191,7 @@ public class DashboardPanel extends JPanel {
         topServicesCard.setLayout(new BorderLayout(6, 6));
         JLabel lblServTitle = new JLabel("Top 5 Services (This Month)");
         lblServTitle.setFont(UIHelper.FONT_SUBHEADER);
-        lblServTitle.setForeground(UIHelper.PRIMARY_COLOR);
+        lblServTitle.setForeground(UIHelper.TEXT_DARK);
         topServicesCard.add(lblServTitle, BorderLayout.NORTH);
 
         String[] servCols = {"S.N.", "Service Name", "Jobs", "Revenue"};
@@ -223,22 +211,11 @@ public class DashboardPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    private JPanel createStatCard(String title, JLabel valueLabel, Color accentColor, String tooltip) {
-        JPanel card = UIHelper.createCard();
-        card.setLayout(new BorderLayout(4, 4));
-        card.setToolTipText(tooltip);
-
-        JLabel lblTitle = new JLabel(title);
-        lblTitle.setFont(UIHelper.FONT_SMALL);
-        lblTitle.setForeground(UIHelper.TEXT_MUTED);
-
-        valueLabel.setFont(UIHelper.FONT_BIG_NUMBER);
-        valueLabel.setForeground(accentColor);
-
-        card.add(lblTitle, BorderLayout.NORTH);
-        card.add(valueLabel, BorderLayout.CENTER);
-
-        return card;
+    private JLabel createFieldLabel(String text) {
+        JLabel lbl = new JLabel(text);
+        lbl.setFont(UIHelper.FONT_BODY);
+        lbl.setForeground(UIHelper.TEXT_MUTED);
+        return lbl;
     }
 
     public void refreshData() {

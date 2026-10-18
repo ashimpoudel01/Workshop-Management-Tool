@@ -40,12 +40,13 @@ public class StockHistoryDialog extends JDialog {
         // Header
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(UIHelper.CARD_BG);
-        JLabel lblTitle = new JLabel(product != null ? "Audit Trail for: " + product.getPartName() : "Recent Stock Movements");
-        lblTitle.setFont(UIHelper.FONT_HEADER);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        topPanel.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader(
+                product != null ? "Stock Audit Trail: " + product.getPartName() : "Recent Stock Movements",
+                "Chronological log of stock adjustments, inward purchases, and sales issues"
+        );
+        topPanel.add(titleGroup, BorderLayout.WEST);
 
-        JButton btnExport = UIHelper.createSecondaryButton("Export CSV");
+        JButton btnExport = UIHelper.createSecondaryButton("📥  Export CSV");
         btnExport.addActionListener(e -> CsvExporter.exportTableToCsv(this, historyTable, "stock_history"));
         topPanel.add(btnExport, BorderLayout.EAST);
 

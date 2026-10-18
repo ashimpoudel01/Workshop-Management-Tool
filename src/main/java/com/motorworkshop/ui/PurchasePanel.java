@@ -61,27 +61,25 @@ public class PurchasePanel extends JPanel {
         JPanel headerBar = new JPanel(new BorderLayout());
         headerBar.setBackground(UIHelper.BG_LIGHT);
 
-        JLabel lblTitle = new JLabel("Supplier Purchases & Stock Inward");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        headerBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("Purchases & Stock Inward", "Record supplier invoices, inward parts inventory, and manage vendors");
+        headerBar.add(titleGroup, BorderLayout.WEST);
 
-        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        actionBtns.setBackground(UIHelper.BG_LIGHT);
+        JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        actionBtns.setOpaque(false);
 
         JButton btnNew = UIHelper.createSuccessButton("+ New Purchase");
         btnNew.addActionListener(e -> openNewPurchase());
 
-        JButton btnVendors = UIHelper.createSecondaryButton("Manage Vendors");
+        JButton btnVendors = UIHelper.createSecondaryButton("👥  Manage Vendors");
         btnVendors.addActionListener(e -> onManageVendors());
 
-        JButton btnView = UIHelper.createPrimaryButton("View Items");
+        JButton btnView = UIHelper.createPrimaryButton("🔍  View Items");
         btnView.addActionListener(e -> onViewItems());
 
-        JButton btnDelete = UIHelper.createDangerButton("Delete Purchase");
+        JButton btnDelete = UIHelper.createDangerButton("🗑️  Delete Purchase");
         btnDelete.addActionListener(e -> onDeletePurchase());
 
-        JButton btnExport = UIHelper.createSecondaryButton("Export CSV");
+        JButton btnExport = UIHelper.createSecondaryButton("📥  Export CSV");
         btnExport.addActionListener(e -> CsvExporter.exportTableToCsv(this, purchaseTable, "purchases_history"));
 
         actionBtns.add(btnNew);

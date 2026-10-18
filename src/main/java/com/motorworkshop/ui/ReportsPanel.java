@@ -80,18 +80,16 @@ public class ReportsPanel extends JPanel {
         // Header Title
         JPanel headerBar = new JPanel(new BorderLayout());
         headerBar.setBackground(UIHelper.BG_LIGHT);
-        JLabel lblTitle = new JLabel("Workshop Financial & Performance Reports");
-        lblTitle.setFont(UIHelper.FONT_TITLE);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        headerBar.add(lblTitle, BorderLayout.WEST);
+        JPanel titleGroup = UIHelper.createSectionHeader("Financial & Performance Reports", "Analyze profit & loss statements, sales trends, parts cost, and expenses");
+        headerBar.add(titleGroup, BorderLayout.WEST);
 
-        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        headerRight.setBackground(UIHelper.BG_LIGHT);
+        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        headerRight.setOpaque(false);
 
-        JButton btnRefresh = UIHelper.createSecondaryButton("Refresh Report");
+        JButton btnRefresh = UIHelper.createSecondaryButton("🔄  Refresh Report");
         btnRefresh.addActionListener(e -> refreshData());
 
-        JButton btnExport = UIHelper.createSecondaryButton("Export Active Tab CSV");
+        JButton btnExport = UIHelper.createSecondaryButton("📥  Export Tab CSV");
         btnExport.addActionListener(e -> onExportCurrentTab());
 
         headerRight.add(btnRefresh);
@@ -163,7 +161,7 @@ public class ReportsPanel extends JPanel {
         summaryGrid.add(createCard("Cost of Parts Sold (COGS)", lblCogs, UIHelper.SECONDARY_COLOR));
         summaryGrid.add(createCard("Gross Profit", lblGrossProfit, UIHelper.SUCCESS_COLOR));
         summaryGrid.add(createCard("Operating Expenses", lblExpenses, UIHelper.DANGER_COLOR));
-        summaryGrid.add(createCard("Net Workshop Profit", lblNetProfit, new Color(16, 185, 129)));
+        summaryGrid.add(createCard("Net Workshop Profit", lblNetProfit, UIHelper.SUCCESS_COLOR));
 
         summaryGrid.add(createCard("Parts Revenue", lblPartsRev, UIHelper.TEXT_DARK));
         summaryGrid.add(createCard("Service Labor Revenue", lblServiceRev, UIHelper.TEXT_DARK));
@@ -188,18 +186,7 @@ public class ReportsPanel extends JPanel {
     }
 
     private JPanel createCard(String title, JLabel valLabel, Color col) {
-        JPanel card = UIHelper.createCard();
-        card.setLayout(new BorderLayout(2, 2));
-        JLabel lbl = new JLabel(title);
-        lbl.setFont(UIHelper.FONT_SMALL);
-        lbl.setForeground(UIHelper.TEXT_MUTED);
-
-        valLabel.setFont(UIHelper.FONT_HEADER);
-        valLabel.setForeground(col);
-
-        card.add(lbl, BorderLayout.NORTH);
-        card.add(valLabel, BorderLayout.CENTER);
-        return card;
+        return UIHelper.createStatCard(title, valLabel, col, "");
     }
 
     private JPanel createPnlTab() {

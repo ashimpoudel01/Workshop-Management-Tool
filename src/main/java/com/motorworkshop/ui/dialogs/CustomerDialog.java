@@ -40,10 +40,11 @@ public class CustomerDialog extends JDialog {
         contentPane.setBorder(new EmptyBorder(18, 20, 18, 20));
         contentPane.setBackground(UIHelper.CARD_BG);
 
-        JLabel lblTitle = new JLabel(customerToEdit == null ? "Customer & Vehicle Information" : "Edit Customer");
-        lblTitle.setFont(UIHelper.FONT_HEADER);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        contentPane.add(lblTitle, BorderLayout.NORTH);
+        JPanel header = UIHelper.createSectionHeader(
+                customerToEdit == null ? "Add Customer & Vehicle" : "Edit Customer Profile",
+                "Contact info, motorcycle brand, model, and registration plate"
+        );
+        contentPane.add(header, BorderLayout.NORTH);
 
         JPanel form = new JPanel(new GridBagLayout());
         form.setBackground(UIHelper.CARD_BG);
@@ -82,7 +83,7 @@ public class CustomerDialog extends JDialog {
         btnPanel.setBackground(UIHelper.CARD_BG);
         JButton btnCancel = UIHelper.createSecondaryButton("Cancel");
         btnCancel.addActionListener(e -> dispose());
-        JButton btnSave = UIHelper.createPrimaryButton(customerToEdit == null ? "Save Customer" : "Update Customer");
+        JButton btnSave = UIHelper.createSuccessButton(customerToEdit == null ? "💾  Save Customer" : "💾  Update Customer");
         btnSave.addActionListener(e -> onSave());
 
         btnPanel.add(btnCancel);

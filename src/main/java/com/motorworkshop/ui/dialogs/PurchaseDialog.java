@@ -62,10 +62,8 @@ public class PurchaseDialog extends JDialog {
         contentPane.setBackground(UIHelper.CARD_BG);
 
         // Title
-        JLabel lblTitle = new JLabel("New Supplier Purchase Invoice");
-        lblTitle.setFont(UIHelper.FONT_HEADER);
-        lblTitle.setForeground(UIHelper.PRIMARY_COLOR);
-        contentPane.add(lblTitle, BorderLayout.NORTH);
+        JPanel titleGroup = UIHelper.createSectionHeader("New Supplier Purchase", "Record vendor bill, part quantities, purchase rates, and update inventory");
+        contentPane.add(titleGroup, BorderLayout.NORTH);
 
         // Main Center container
         JPanel centerPanel = new JPanel(new BorderLayout(10, 10));
@@ -219,7 +217,7 @@ public class PurchaseDialog extends JDialog {
         btnPanel.setBackground(UIHelper.CARD_BG);
         JButton btnCancel = UIHelper.createSecondaryButton("Cancel");
         btnCancel.addActionListener(e -> dispose());
-        JButton btnSave = UIHelper.createSuccessButton("Save Purchase & Update Stock");
+        JButton btnSave = UIHelper.createSuccessButton("💾  Save Purchase & Inward Stock");
         btnSave.addActionListener(e -> onSavePurchase());
 
         btnPanel.add(btnCancel);
