@@ -48,7 +48,7 @@ public class InvoicePrinter {
         sb.append("<table class='info-table'>")
           .append("<tr>")
           .append("<td><b>Invoice No:</b> ").append(sale.getInvoiceNumber()).append("</td>")
-          .append("<td class='text-right'><b>Date:</b> ").append(sale.getDate()).append("</td>")
+          .append("<td class='text-right'><b>Date:</b> ").append(DateUtil.toDisplayDate(sale.getDate())).append("</td>")
           .append("</tr><tr>")
           .append("<td><b>Customer:</b> ").append(escapeHtml(sale.getCustomerName())).append(" (").append(escapeHtml(sale.getCustomerPhone())).append(")</td>")
           .append("<td class='text-right'><b>Payment:</b> ").append(escapeHtml(sale.getPaymentMethod())).append("</td>")

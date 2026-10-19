@@ -108,7 +108,7 @@ public class NewSaleDialog extends JDialog {
         txtInvoiceNo = new JTextField(saleService.generateNextInvoiceNumber(), 12);
         txtInvoiceNo.setEditable(false);
         txtInvoiceNo.setFont(UIHelper.FONT_BOLD);
-        txtDate = new JTextField(DateUtil.today(), 10);
+        txtDate = new JTextField(DateUtil.todayBs(), 10);
 
         JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         headerRight.setBackground(UIHelper.BG_LIGHT);
@@ -696,7 +696,7 @@ public class NewSaleDialog extends JDialog {
 
         Sale sale = new Sale();
         sale.setInvoiceNumber(txtInvoiceNo.getText().trim());
-        sale.setDate(txtDate.getText().trim());
+        sale.setDate(DateUtil.toStorageDate(txtDate.getText().trim()));
         sale.setCustomerId(custId);
         sale.setCustomerName(custName);
         sale.setCustomerPhone(phone.isEmpty() ? "-" : phone);

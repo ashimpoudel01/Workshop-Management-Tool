@@ -4,6 +4,7 @@ import com.motorworkshop.model.InventoryTransaction;
 import com.motorworkshop.model.Product;
 import com.motorworkshop.service.InventoryService;
 import com.motorworkshop.util.CsvExporter;
+import com.motorworkshop.util.DateUtil;
 import com.motorworkshop.util.UIHelper;
 
 import javax.swing.*;
@@ -92,7 +93,7 @@ public class StockHistoryDialog extends JDialog {
             for (InventoryTransaction tx : list) {
                 tableModel.addRow(new Object[]{
                         sn++,
-                        tx.getDate(),
+                        DateUtil.toDisplayDate(tx.getDate()),
                         tx.getProductName(),
                         tx.getTransactionType(),
                         (tx.getQuantity() > 0 ? "+" : "") + tx.getQuantity(),

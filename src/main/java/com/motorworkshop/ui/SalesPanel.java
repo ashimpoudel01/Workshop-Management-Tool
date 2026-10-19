@@ -109,8 +109,8 @@ public class SalesPanel extends JPanel {
             public void changedUpdate(DocumentEvent e) { loadData(); }
         });
 
-        txtStartDate = new JTextField(DateUtil.startOfMonth(), 9);
-        txtEndDate = new JTextField(DateUtil.today(), 9);
+        txtStartDate = new JTextField(DateUtil.startOfMonthBs(), 9);
+        txtEndDate = new JTextField(DateUtil.todayBs(), 9);
         cbPaymentFilter = new JComboBox<>(new String[]{"All Methods", "Cash", "Bank", "eSewa", "Khalti", "Other"});
         cbPaymentFilter.addActionListener(e -> loadData());
 
@@ -119,8 +119,8 @@ public class SalesPanel extends JPanel {
 
         JButton btnToday = UIHelper.createSecondaryButton("Today");
         btnToday.addActionListener(e -> {
-            txtStartDate.setText(DateUtil.today());
-            txtEndDate.setText(DateUtil.today());
+            txtStartDate.setText(DateUtil.todayBs());
+            txtEndDate.setText(DateUtil.todayBs());
             loadData();
         });
 
@@ -194,8 +194,8 @@ public class SalesPanel extends JPanel {
         SwingUtilities.invokeLater(() -> {
             try {
                 String search = txtSearch.getText().trim();
-                String start = txtStartDate.getText().trim();
-                String end = txtEndDate.getText().trim();
+                String start = DateUtil.toStorageDateOrEmpty(txtStartDate.getText());
+                String end = DateUtil.toStorageDateOrEmpty(txtEndDate.getText());
                 String payMethod = (String) cbPaymentFilter.getSelectedItem();
 
                 currentSalesList = saleService.searchSales(search, start, end, payMethod);
@@ -216,7 +216,7 @@ public class SalesPanel extends JPanel {
                     tableModel.addRow(new Object[]{
                             sn++,
                             s.getInvoiceNumber(),
-                            s.getDate(),
+                            DateUtil.toDisplayDate(s.getDate()),
                             s.getCustomerName(),
                             s.getCustomerPhone() != null ? s.getCustomerPhone() : "-",
                             (s.getVehicleBrand() != null ? s.getVehicleBrand() : "") + " " + (s.getVehicleModel() != null ? s.getVehicleModel() : ""),

@@ -96,7 +96,7 @@ public class PurchaseDialog extends JDialog {
         supplierPanel.add(supBtns, BorderLayout.EAST);
 
         txtInvoiceNo = new JTextField("PO-" + System.currentTimeMillis() % 100000, 12);
-        txtDate = new JTextField(DateUtil.today(), 10);
+        txtDate = new JTextField(DateUtil.todayBs(), 10);
         cbPaymentStatus = new JComboBox<>(new String[]{"PAID", "UNPAID", "PARTIAL"});
         txtNotes = new JTextField(15);
 
@@ -391,7 +391,7 @@ public class PurchaseDialog extends JDialog {
 
         Purchase p = new Purchase();
         p.setInvoiceNumber(invNo);
-        p.setDate(txtDate.getText().trim());
+        p.setDate(DateUtil.toStorageDate(txtDate.getText().trim()));
         p.setSupplierId(supId);
         p.setPaymentStatus((String) cbPaymentStatus.getSelectedItem());
         p.setNotes(txtNotes.getText().trim());

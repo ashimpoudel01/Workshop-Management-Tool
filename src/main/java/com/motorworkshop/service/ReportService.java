@@ -48,8 +48,8 @@ public class ReportService {
                 break;
             case CUSTOM:
             default:
-                start = customStart != null && !customStart.trim().isEmpty() ? customStart.trim() : DateUtil.today();
-                end = customEnd != null && !customEnd.trim().isEmpty() ? customEnd.trim() : DateUtil.today();
+                start = customStart != null && !customStart.trim().isEmpty() ? DateUtil.toStorageDate(customStart) : DateUtil.today();
+                end = customEnd != null && !customEnd.trim().isEmpty() ? DateUtil.toStorageDate(customEnd) : DateUtil.today();
                 break;
         }
 

@@ -116,8 +116,8 @@ public class ReportsPanel extends JPanel {
         JButton btnAllTime = UIHelper.createSecondaryButton("All Time");
         btnAllTime.addActionListener(e -> loadReport(ReportService.FilterPreset.ALL_TIME));
 
-        txtStartDate = new JTextField(DateUtil.startOfMonth(), 9);
-        txtEndDate = new JTextField(DateUtil.today(), 9);
+        txtStartDate = new JTextField(DateUtil.startOfMonthBs(), 9);
+        txtEndDate = new JTextField(DateUtil.todayBs(), 9);
         JButton btnCustom = UIHelper.createPrimaryButton("Apply Range");
         btnCustom.addActionListener(e -> loadReport(ReportService.FilterPreset.CUSTOM));
 
@@ -287,17 +287,18 @@ public class ReportsPanel extends JPanel {
         SwingUtilities.invokeLater(() -> {
             try {
                 if (preset == ReportService.FilterPreset.TODAY) {
-                    txtStartDate.setText(DateUtil.today());
-                    txtEndDate.setText(DateUtil.today());
+                    txtStartDate.setText(DateUtil.todayBs());
+                    txtEndDate.setText(DateUtil.todayBs());
                 } else if (preset == ReportService.FilterPreset.YESTERDAY) {
-                    txtStartDate.setText(DateUtil.yesterday());
-                    txtEndDate.setText(DateUtil.yesterday());
+                    txtStartDate.setText(DateUtil.formatBs(java.time.LocalDate.now().minusDays(1)));
+                    txtEndDate.setText(DateUtil.formatBs(java.time.LocalDate.now().minusDays(1)));
                 } else if (preset == ReportService.FilterPreset.THIS_WEEK) {
-                    txtStartDate.setText(DateUtil.startOfWeek());
-                    txtEndDate.setText(DateUtil.endOfWeek());
+                    java.time.LocalDate today = java.time.LocalDate.now();
+                    txtStartDate.setText(DateUtil.formatBs(today.minusDays(today.getDayOfWeek().getValue() - 1)));
+                    txtEndDate.setText(DateUtil.formatBs(today.plusDays(7 - today.getDayOfWeek().getValue())));
                 } else if (preset == ReportService.FilterPreset.THIS_MONTH) {
-                    txtStartDate.setText(DateUtil.startOfMonth());
-                    txtEndDate.setText(DateUtil.endOfMonth());
+                    txtStartDate.setText(DateUtil.startOfMonthBs());
+                    txtEndDate.setText(DateUtil.formatBs(java.time.LocalDate.now().with(java.time.temporal.TemporalAdjusters.lastDayOfMonth())));
                 } else if (preset == ReportService.FilterPreset.ALL_TIME) {
                     txtStartDate.setText("");
                     txtEndDate.setText("");
@@ -337,7 +338,7 @@ public class ReportsPanel extends JPanel {
                     salesModel.addRow(new Object[]{
                             snSales++,
                             s.getInvoiceNumber(),
-                            s.getDate(),
+                            DateUtil.toDisplayDate(s.getDate()),
                             s.getCustomerName(),
                             s.getCustomerPhone() != null ? s.getCustomerPhone() : "-",
                             s.getVehicleBrand() + " " + s.getVehicleModel(),
@@ -356,7 +357,7 @@ public class ReportsPanel extends JPanel {
                 for (Purchase p : currentReportData.getPurchaseList()) {
                     purchasesModel.addRow(new Object[]{
                             snPurchases++,
-                            p.getDate(),
+                            DateUtil.toDisplayDate(p.getDate()),
                             p.getInvoiceNumber(),
                             p.getSupplierName() != null ? p.getSupplierName() : "-",
                             FormatUtil.formatCurrencyPlain(p.getTotalAmount()),
@@ -371,7 +372,7 @@ public class ReportsPanel extends JPanel {
                 for (Expense exp : currentReportData.getExpenseList()) {
                     expensesModel.addRow(new Object[]{
                             snExpenses++,
-                            exp.getDate(),
+                            DateUtil.toDisplayDate(exp.getDate()),
                             exp.getCategory(),
                             exp.getDescription(),
                             FormatUtil.formatCurrencyPlain(exp.getAmount()),

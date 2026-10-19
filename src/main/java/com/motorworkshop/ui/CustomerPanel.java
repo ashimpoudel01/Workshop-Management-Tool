@@ -202,7 +202,7 @@ public class CustomerPanel extends JPanel {
                 model.addRow(new Object[]{
                         sn++,
                         s.getInvoiceNumber(),
-                        s.getDate(),
+                        DateUtil.toDisplayDate(s.getDate()),
                         s.getVehicleBrand() + " " + s.getVehicleModel() + " (" + s.getVehicleRegNo() + ")",
                         FormatUtil.formatCurrencyPlain(s.getPartsTotal()),
                         FormatUtil.formatCurrencyPlain(s.getServiceCharge()),

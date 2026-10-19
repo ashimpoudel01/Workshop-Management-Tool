@@ -50,7 +50,7 @@ public class ExpenseDialog extends JDialog {
         JPanel form = new JPanel(new GridLayout(6, 2, 8, 10));
         form.setBackground(UIHelper.CARD_BG);
 
-        txtDate = new JTextField(DateUtil.today(), 10);
+        txtDate = new JTextField(DateUtil.todayBs(), 10);
         cbCategory = new JComboBox<>(ExpenseService.EXPENSE_CATEGORIES.toArray(new String[0]));
         txtDescription = new JTextField(20);
         txtAmount = new JTextField("0.00", 10);
@@ -89,7 +89,7 @@ public class ExpenseDialog extends JDialog {
 
     private void populateData() {
         if (expenseToEdit != null) {
-            txtDate.setText(expenseToEdit.getDate());
+            txtDate.setText(DateUtil.toDisplayDate(expenseToEdit.getDate()));
             cbCategory.setSelectedItem(expenseToEdit.getCategory());
             txtDescription.setText(expenseToEdit.getDescription());
             txtAmount.setText(String.valueOf(expenseToEdit.getAmount()));
@@ -99,7 +99,7 @@ public class ExpenseDialog extends JDialog {
     }
 
     private void onSave() {
-        String date = txtDate.getText().trim();
+                String date = DateUtil.toStorageDate(txtDate.getText().trim());
         String desc = txtDescription.getText().trim();
         double amount = FormatUtil.parseDouble(txtAmount.getText(), -1);
 

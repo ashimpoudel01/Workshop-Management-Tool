@@ -103,8 +103,8 @@ public class PurchasePanel extends JPanel {
             public void changedUpdate(DocumentEvent e) { loadData(); }
         });
 
-        txtStartDate = new JTextField(DateUtil.startOfMonth(), 9);
-        txtEndDate = new JTextField(DateUtil.today(), 9);
+        txtStartDate = new JTextField(DateUtil.startOfMonthBs(), 9);
+        txtEndDate = new JTextField(DateUtil.todayBs(), 9);
         cbSupplierFilter = new JComboBox<>();
         cbSupplierFilter.addActionListener(e -> loadData());
 
@@ -169,8 +169,8 @@ public class PurchasePanel extends JPanel {
         SwingUtilities.invokeLater(() -> {
             try {
                 String search = txtSearch.getText().trim();
-                String start = txtStartDate.getText().trim();
-                String end = txtEndDate.getText().trim();
+                String start = DateUtil.toStorageDateOrEmpty(txtStartDate.getText());
+                String end = DateUtil.toStorageDateOrEmpty(txtEndDate.getText());
                 Supplier s = (Supplier) cbSupplierFilter.getSelectedItem();
                 Integer supId = s != null && s.getSupplierId() > 0 ? s.getSupplierId() : null;
 
@@ -183,7 +183,7 @@ public class PurchasePanel extends JPanel {
                     total += p.getTotalAmount();
                     tableModel.addRow(new Object[]{
                             sn++,
-                            p.getDate(),
+                            DateUtil.toDisplayDate(p.getDate()),
                             p.getInvoiceNumber(),
                             p.getSupplierName() != null ? p.getSupplierName() : "General Supplier",
                             FormatUtil.formatCurrencyPlain(p.getTotalAmount()),

@@ -98,16 +98,16 @@ public class ExpensePanel extends JPanel {
         cbCategoryFilter = new JComboBox<>(catList.toArray(new String[0]));
         cbCategoryFilter.addActionListener(e -> loadData());
 
-        txtStartDate = new JTextField(DateUtil.startOfMonth(), 9);
-        txtEndDate = new JTextField(DateUtil.today(), 9);
+        txtStartDate = new JTextField(DateUtil.startOfMonthBs(), 9);
+        txtEndDate = new JTextField(DateUtil.todayBs(), 9);
 
         JButton btnFilter = UIHelper.createSecondaryButton("Filter Dates");
         btnFilter.addActionListener(e -> loadData());
 
         JButton btnToday = UIHelper.createSecondaryButton("Today");
         btnToday.addActionListener(e -> {
-            txtStartDate.setText(DateUtil.today());
-            txtEndDate.setText(DateUtil.today());
+            txtStartDate.setText(DateUtil.todayBs());
+            txtEndDate.setText(DateUtil.todayBs());
             loadData();
         });
 
@@ -160,8 +160,8 @@ public class ExpensePanel extends JPanel {
             try {
                 String search = txtSearch.getText().trim();
                 String category = (String) cbCategoryFilter.getSelectedItem();
-                String start = txtStartDate.getText().trim();
-                String end = txtEndDate.getText().trim();
+                String start = DateUtil.toStorageDateOrEmpty(txtStartDate.getText());
+                String end = DateUtil.toStorageDateOrEmpty(txtEndDate.getText());
 
                 currentExpenseList = expenseService.searchExpenses(search, category, start, end);
                 tableModel.setRowCount(0);
@@ -172,7 +172,7 @@ public class ExpensePanel extends JPanel {
                     total += exp.getAmount();
                     tableModel.addRow(new Object[]{
                             sn++,
-                            exp.getDate(),
+                            DateUtil.toDisplayDate(exp.getDate()),
                             exp.getCategory(),
                             exp.getDescription(),
                             FormatUtil.formatCurrencyPlain(exp.getAmount()),
