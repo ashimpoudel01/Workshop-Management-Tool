@@ -130,8 +130,8 @@ public class CustomerDAO {
     }
 
     public boolean insertCustomer(Customer c) throws SQLException {
-        String sql = "INSERT INTO customers (name, phone, address, vehicle_number, vehicle_brand, vehicle_model, notes, created_at) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO customers (name, phone, address, vehicle_number, vehicle_brand, vehicle_model, notes, created_at, credit_amount) " +
+                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, c.getName());
@@ -142,6 +142,7 @@ public class CustomerDAO {
             pstmt.setString(6, c.getVehicleModel() != null ? c.getVehicleModel() : "");
             pstmt.setString(7, c.getNotes() != null ? c.getNotes() : "");
             pstmt.setString(8, c.getCreatedAt() != null ? c.getCreatedAt() : com.motorworkshop.util.DateUtil.today());
+            pstmt.setDouble(9, c.getCreditAmount());
 
             int affected = pstmt.executeUpdate();
             if (affected > 0) {
@@ -158,7 +159,7 @@ public class CustomerDAO {
 
     public boolean updateCustomer(Customer c) throws SQLException {
         String sql = "UPDATE customers SET name = ?, phone = ?, address = ?, vehicle_number = ?, " +
-                     "vehicle_brand = ?, vehicle_model = ?, notes = ? WHERE customer_id = ?";
+                 "vehicle_brand = ?, vehicle_model = ?, notes = ?, credit_amount = ? WHERE customer_id = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, c.getName());
@@ -168,7 +169,8 @@ public class CustomerDAO {
             pstmt.setString(5, c.getVehicleBrand());
             pstmt.setString(6, c.getVehicleModel());
             pstmt.setString(7, c.getNotes());
-            pstmt.setInt(8, c.getCustomerId());
+            pstmt.setDouble(8, c.getCreditAmount());
+            pstmt.setInt(9, c.getCustomerId());
             return pstmt.executeUpdate() > 0;
         }
     }
@@ -197,6 +199,7 @@ public class CustomerDAO {
         c.setTotalSpent(rs.getDouble("total_spent"));
         c.setTotalDue(rs.getDouble("total_due"));
         c.setLastVisitDate(rs.getString("last_visit"));
+        c.setCreditAmount(rs.getDouble("credit_amount"));
         return c;
     }
 }

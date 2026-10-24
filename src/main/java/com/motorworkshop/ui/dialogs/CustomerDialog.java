@@ -3,6 +3,7 @@ package com.motorworkshop.ui.dialogs;
 import com.motorworkshop.model.Customer;
 import com.motorworkshop.service.CustomerService;
 import com.motorworkshop.util.UIHelper;
+import com.motorworkshop.util.FormatUtil;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -23,6 +24,7 @@ public class CustomerDialog extends JDialog {
     private JTextField txtBrand;
     private JTextField txtModel;
     private JTextField txtNotes;
+    private JTextField txtCreditAmount;
 
     public CustomerDialog(Frame owner, CustomerService customerService, Customer customerToEdit) {
         super(owner, customerToEdit == null ? "Add New Customer" : "Edit Customer Details", true);
@@ -60,6 +62,7 @@ public class CustomerDialog extends JDialog {
         txtBrand = new JTextField(12);
         txtModel = new JTextField(15);
         txtNotes = new JTextField(20);
+        txtCreditAmount = new JTextField(12);
 
         int row = 0;
         addFormField(form, gbc, "Full Name *:", txtName, 0, row, 1);
@@ -75,6 +78,9 @@ public class CustomerDialog extends JDialog {
         row++;
         addFormField(form, gbc, "Vehicle Model (e.g. Pulsar 150, Dio):", txtModel, 0, row, 1);
         addFormField(form, gbc, "Customer Notes:", txtNotes, 1, row, 1);
+
+        row++;
+        addFormField(form, gbc, "Recorded Credit Amount (Rs.):", txtCreditAmount, 0, row, 1);
 
         contentPane.add(form, BorderLayout.CENTER);
 
@@ -117,6 +123,7 @@ public class CustomerDialog extends JDialog {
             txtBrand.setText(customerToEdit.getVehicleBrand());
             txtModel.setText(customerToEdit.getVehicleModel());
             txtNotes.setText(customerToEdit.getNotes());
+            txtCreditAmount.setText(FormatUtil.formatCurrencyPlain(customerToEdit.getCreditAmount()));
         }
     }
 
@@ -133,6 +140,13 @@ public class CustomerDialog extends JDialog {
             phone = "-";
         }
 
+        double creditAmount = FormatUtil.parseDouble(txtCreditAmount.getText(), -1);
+        if (creditAmount < 0) {
+            UIHelper.showWarning(this, "Credit amount must be zero or greater.");
+            txtCreditAmount.requestFocus();
+            return;
+        }
+
         try {
             if (customerToEdit == null) {
                 Customer c = new Customer();
@@ -143,6 +157,7 @@ public class CustomerDialog extends JDialog {
                 c.setVehicleBrand(txtBrand.getText().trim());
                 c.setVehicleModel(txtModel.getText().trim());
                 c.setNotes(txtNotes.getText().trim());
+                c.setCreditAmount(creditAmount);
 
                 customerService.addCustomer(c);
                 UIHelper.showInfo(this, "Customer successfully saved!");
@@ -154,6 +169,7 @@ public class CustomerDialog extends JDialog {
                 customerToEdit.setVehicleBrand(txtBrand.getText().trim());
                 customerToEdit.setVehicleModel(txtModel.getText().trim());
                 customerToEdit.setNotes(txtNotes.getText().trim());
+                customerToEdit.setCreditAmount(creditAmount);
 
                 customerService.updateCustomer(customerToEdit);
                 UIHelper.showInfo(this, "Customer details updated!");

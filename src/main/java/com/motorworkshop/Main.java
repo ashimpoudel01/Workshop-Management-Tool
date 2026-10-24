@@ -2,7 +2,9 @@ package com.motorworkshop;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.motorworkshop.database.DatabaseManager;
+import com.motorworkshop.ui.LoginDialog;
 import com.motorworkshop.ui.MainFrame;
+import com.motorworkshop.ui.UserRole;
 
 import javax.swing.*;
 
@@ -46,7 +48,13 @@ public class Main {
 
         // Launch UI on Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
-            MainFrame mainFrame = new MainFrame();
+            LoginDialog loginDialog = new LoginDialog(null);
+            loginDialog.setVisible(true);
+            UserRole role = loginDialog.getAuthenticatedRole();
+            if (role == null) {
+                System.exit(0);
+            }
+            MainFrame mainFrame = new MainFrame(role);
             mainFrame.setVisible(true);
         });
     }

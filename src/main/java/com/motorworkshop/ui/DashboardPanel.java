@@ -16,6 +16,7 @@ import java.util.function.Consumer;
  */
 public class DashboardPanel extends JPanel {
     private final SaleService saleService;
+    private final UserRole userRole;
     private final Consumer<String> navigationCallback;
     private final Runnable openNewSaleCallback;
     private final Runnable openNewPurchaseCallback;
@@ -39,9 +40,10 @@ public class DashboardPanel extends JPanel {
     private DefaultTableModel topPartsModel;
     private DefaultTableModel topServicesModel;
 
-    public DashboardPanel(SaleService saleService, Consumer<String> navigationCallback,
+    public DashboardPanel(SaleService saleService, UserRole userRole, Consumer<String> navigationCallback,
                           Runnable openNewSaleCallback, Runnable openNewPurchaseCallback) {
         this.saleService = saleService;
+        this.userRole = userRole;
         this.navigationCallback = navigationCallback;
         this.openNewSaleCallback = openNewSaleCallback;
         this.openNewPurchaseCallback = openNewPurchaseCallback;
@@ -90,15 +92,20 @@ public class DashboardPanel extends JPanel {
         lblLowStock = new JLabel("0 Items");
         lblTodayBills = new JLabel("0 Bills");
 
-        kpiGrid.add(UIHelper.createStatCard("Today's Sales", lblTodaySales, UIHelper.PRIMARY_COLOR, "Total revenue billed today"));
-        kpiGrid.add(UIHelper.createStatCard("Gross Profit", lblTodayGrossProfit, UIHelper.SUCCESS_COLOR, "Sales revenue - Part costs"));
-        kpiGrid.add(UIHelper.createStatCard("Today's Expenses", lblTodayExpenses, UIHelper.DANGER_COLOR, "Daily garage running costs"));
-        kpiGrid.add(UIHelper.createStatCard("Net Profit Today", lblTodayNetProfit, UIHelper.SUCCESS_COLOR, "Gross profit - Expenses"));
-
-        kpiGrid.add(UIHelper.createStatCard("Today's Purchases", lblTodayPurchases, UIHelper.SECONDARY_COLOR, "Supplier stock inward"));
-        kpiGrid.add(UIHelper.createStatCard("Inventory Value", lblInventoryValue, UIHelper.INFO_COLOR, "Current stock valuation"));
-        kpiGrid.add(UIHelper.createStatCard("Low Stock Alert", lblLowStock, UIHelper.WARNING_COLOR, "Parts below minimum stock"));
-        kpiGrid.add(UIHelper.createStatCard("Completed Bills", lblTodayBills, UIHelper.INFO_COLOR, "Job cards completed today"));
+        if (userRole == UserRole.ADMIN) {
+            kpiGrid.add(UIHelper.createStatCard("Today's Sales", lblTodaySales, UIHelper.PRIMARY_COLOR, "Total revenue billed today"));
+            kpiGrid.add(UIHelper.createStatCard("Gross Profit", lblTodayGrossProfit, UIHelper.SUCCESS_COLOR, "Sales revenue - Part costs"));
+            kpiGrid.add(UIHelper.createStatCard("Today's Expenses", lblTodayExpenses, UIHelper.DANGER_COLOR, "Daily garage running costs"));
+            kpiGrid.add(UIHelper.createStatCard("Net Profit Today", lblTodayNetProfit, UIHelper.SUCCESS_COLOR, "Gross profit - Expenses"));
+            kpiGrid.add(UIHelper.createStatCard("Today's Purchases", lblTodayPurchases, UIHelper.SECONDARY_COLOR, "Supplier stock inward"));
+            kpiGrid.add(UIHelper.createStatCard("Inventory Value", lblInventoryValue, UIHelper.INFO_COLOR, "Current stock valuation"));
+            kpiGrid.add(UIHelper.createStatCard("Low Stock Alert", lblLowStock, UIHelper.WARNING_COLOR, "Parts below minimum stock"));
+            kpiGrid.add(UIHelper.createStatCard("Completed Bills", lblTodayBills, UIHelper.INFO_COLOR, "Job cards completed today"));
+        } else {
+            kpiGrid.setLayout(new GridLayout(1, 2, 12, 12));
+            kpiGrid.add(UIHelper.createStatCard("Today's Revenue", lblTodaySales, UIHelper.PRIMARY_COLOR, "Revenue billed from today's job cards"));
+            kpiGrid.add(UIHelper.createStatCard("Completed Bills", lblTodayBills, UIHelper.INFO_COLOR, "Job cards completed today"));
+        }
 
         centerContent.add(kpiGrid);
         centerContent.add(Box.createRigidArea(new Dimension(0, 14)));
@@ -113,21 +120,20 @@ public class DashboardPanel extends JPanel {
             if (openNewSaleCallback != null) openNewSaleCallback.run();
         });
 
-        JButton btnNewPurchase = UIHelper.createPrimaryButton("+ New Parts Purchase");
-        btnNewPurchase.addActionListener(e -> {
-            if (openNewPurchaseCallback != null) openNewPurchaseCallback.run();
-        });
-
         JButton btnInventory = UIHelper.createSecondaryButton("📦  Manage Inventory");
         btnInventory.addActionListener(e -> navigationCallback.accept("Inventory"));
-
-        JButton btnReports = UIHelper.createSecondaryButton("📈  P&L Reports");
-        btnReports.addActionListener(e -> navigationCallback.accept("Reports"));
-
         quickActions.add(btnNewSale);
-        quickActions.add(btnNewPurchase);
         quickActions.add(btnInventory);
-        quickActions.add(btnReports);
+        if (userRole == UserRole.ADMIN) {
+            JButton btnNewPurchase = UIHelper.createPrimaryButton("+ New Parts Purchase");
+            btnNewPurchase.addActionListener(e -> {
+                if (openNewPurchaseCallback != null) openNewPurchaseCallback.run();
+            });
+            JButton btnReports = UIHelper.createSecondaryButton("📈  P&L Reports");
+            btnReports.addActionListener(e -> navigationCallback.accept("Reports"));
+            quickActions.add(btnNewPurchase);
+            quickActions.add(btnReports);
+        }
 
         centerContent.add(quickActions);
         centerContent.add(Box.createRigidArea(new Dimension(0, 14)));
@@ -203,7 +209,9 @@ public class DashboardPanel extends JPanel {
         topServicesCard.add(new JScrollPane(topServTable), BorderLayout.CENTER);
         bottomRow.add(topServicesCard);
 
-        centerContent.add(bottomRow);
+        if (userRole == UserRole.ADMIN) {
+            centerContent.add(bottomRow);
+        }
 
         JScrollPane scrollPane = new JScrollPane(centerContent);
         scrollPane.setBorder(null);

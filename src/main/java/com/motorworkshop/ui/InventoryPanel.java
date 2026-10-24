@@ -26,6 +26,7 @@ import java.util.List;
 public class InventoryPanel extends JPanel {
     private final InventoryService inventoryService;
     private final Frame parentFrame;
+    private final boolean canManageInventory;
 
     private JTextField txtSearch;
     private JComboBox<Category> cbCategoryFilter;
@@ -40,9 +41,10 @@ public class InventoryPanel extends JPanel {
     private JLabel lblTotalItems;
     private JLabel lblTotalValuation;
 
-    public InventoryPanel(InventoryService inventoryService, Frame parentFrame) {
+    public InventoryPanel(InventoryService inventoryService, Frame parentFrame, boolean canManageInventory) {
         this.inventoryService = inventoryService;
         this.parentFrame = parentFrame;
+        this.canManageInventory = canManageInventory;
 
         setLayout(new BorderLayout(12, 12));
         setBorder(new EmptyBorder(15, 18, 15, 18));
@@ -68,29 +70,27 @@ public class InventoryPanel extends JPanel {
         JPanel actionBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         actionBtns.setOpaque(false);
 
-        JButton btnAdd = UIHelper.createSuccessButton("+ Add Part");
-        btnAdd.addActionListener(e -> onAddItem());
-
-        JButton btnEdit = UIHelper.createPrimaryButton("✏️  Edit Part");
-        btnEdit.addActionListener(e -> onEditItem());
-
-        JButton btnAdjust = UIHelper.createSecondaryButton("⚖️  Adjust Stock");
-        btnAdjust.addActionListener(e -> onAdjustStock());
-
         JButton btnHistory = UIHelper.createSecondaryButton("📜  Audit Trail");
         btnHistory.addActionListener(e -> onStockHistory());
-
-        JButton btnDelete = UIHelper.createDangerButton("🗑️  Delete");
-        btnDelete.addActionListener(e -> onDeleteItem());
 
         JButton btnExport = UIHelper.createSecondaryButton("📥  Export CSV");
         btnExport.addActionListener(e -> CsvExporter.exportTableToCsv(this, productTable, "inventory_stock"));
 
-        actionBtns.add(btnAdd);
-        actionBtns.add(btnEdit);
-        actionBtns.add(btnAdjust);
+        if (canManageInventory) {
+            JButton btnAdd = UIHelper.createSuccessButton("+ Add Part");
+            btnAdd.addActionListener(e -> onAddItem());
+            JButton btnEdit = UIHelper.createPrimaryButton("✏️  Edit Part");
+            btnEdit.addActionListener(e -> onEditItem());
+            JButton btnAdjust = UIHelper.createSecondaryButton("⚖️  Adjust Stock");
+            btnAdjust.addActionListener(e -> onAdjustStock());
+            JButton btnDelete = UIHelper.createDangerButton("🗑️  Delete");
+            btnDelete.addActionListener(e -> onDeleteItem());
+            actionBtns.add(btnAdd);
+            actionBtns.add(btnEdit);
+            actionBtns.add(btnAdjust);
+            actionBtns.add(btnDelete);
+        }
         actionBtns.add(btnHistory);
-        actionBtns.add(btnDelete);
         actionBtns.add(btnExport);
 
         headerBar.add(actionBtns, BorderLayout.EAST);
@@ -135,7 +135,9 @@ public class InventoryPanel extends JPanel {
         add(topContainer, BorderLayout.NORTH);
 
         // Center Table
-        String[] columns = {"S.N.", "Part / Item Name", "Part No", "Category", "Brand", "Buy Rate", "Retail Rate", "Workshop Rate", "Current Stock", "Min Stock", "Unit", "Total Value", "Status"};
+        String[] columns = canManageInventory
+            ? new String[]{"S.N.", "Part / Item Name", "Part No", "Category", "Brand", "Buy Rate", "Retail Rate", "Workshop Rate", "Current Stock", "Min Stock", "Unit", "Total Value", "Status"}
+            : new String[]{"S.N.", "Part / Item Name", "Part No", "Category", "Brand", "Retail Rate", "Workshop Rate", "Current Stock", "Min Stock", "Unit", "Status"};
         tableModel = new DefaultTableModel(columns, 0) {
             public boolean isCellEditable(int row, int col) { return false; }
         };
@@ -144,7 +146,7 @@ public class InventoryPanel extends JPanel {
         UIHelper.styleTable(productTable);
 
         // Custom renderer for Status column with soft badges
-        productTable.getColumnModel().getColumn(12).setCellRenderer(new DefaultTableCellRenderer() {
+        productTable.getColumnModel().getColumn(canManageInventory ? 12 : 10).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel c = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -186,7 +188,9 @@ public class InventoryPanel extends JPanel {
         lblTotalValuation.setForeground(UIHelper.PRIMARY_COLOR);
 
         footerBar.add(lblTotalItems, BorderLayout.WEST);
-        footerBar.add(lblTotalValuation, BorderLayout.EAST);
+        if (canManageInventory) {
+            footerBar.add(lblTotalValuation, BorderLayout.EAST);
+        }
         add(footerBar, BorderLayout.SOUTH);
     }
 
@@ -231,21 +235,29 @@ public class InventoryPanel extends JPanel {
                     if (p.isOutOfStock()) status = "Out of Stock";
                     else if (p.isLowStock()) status = "Low Stock";
 
-                    tableModel.addRow(new Object[]{
-                            sn++,
-                            p.getPartName(),
-                            p.getPartNumber() != null ? p.getPartNumber() : "-",
-                            p.getCategoryName() != null ? p.getCategoryName() : "-",
-                            p.getBrand() != null ? p.getBrand() : "-",
-                            FormatUtil.formatCurrencyPlain(p.getPurchasePrice()),
-                            FormatUtil.formatCurrencyPlain(p.getSellingPrice()),
-                            FormatUtil.formatCurrencyPlain(p.getWorkshopPrice()),
-                            p.getCurrentQuantity(),
-                            p.getMinStockLevel(),
-                            p.getUnit(),
-                            FormatUtil.formatCurrencyPlain(val),
-                            status
-                    });
+                    if (canManageInventory) {
+                        tableModel.addRow(new Object[]{
+                                sn++, p.getPartName(),
+                                p.getPartNumber() != null ? p.getPartNumber() : "-",
+                                p.getCategoryName() != null ? p.getCategoryName() : "-",
+                                p.getBrand() != null ? p.getBrand() : "-",
+                                FormatUtil.formatCurrencyPlain(p.getPurchasePrice()),
+                                FormatUtil.formatCurrencyPlain(p.getSellingPrice()),
+                                FormatUtil.formatCurrencyPlain(p.getWorkshopPrice()),
+                                p.getCurrentQuantity(), p.getMinStockLevel(), p.getUnit(),
+                                FormatUtil.formatCurrencyPlain(val), status
+                        });
+                    } else {
+                        tableModel.addRow(new Object[]{
+                                sn++, p.getPartName(),
+                                p.getPartNumber() != null ? p.getPartNumber() : "-",
+                                p.getCategoryName() != null ? p.getCategoryName() : "-",
+                                p.getBrand() != null ? p.getBrand() : "-",
+                                FormatUtil.formatCurrencyPlain(p.getSellingPrice()),
+                                FormatUtil.formatCurrencyPlain(p.getWorkshopPrice()),
+                                p.getCurrentQuantity(), p.getMinStockLevel(), p.getUnit(), status
+                        });
+                    }
                 }
 
                 lblTotalItems.setText("Total Parts Listed: " + currentProductList.size());

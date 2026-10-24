@@ -19,6 +19,7 @@ public class Customer {
     private double totalSpent;
     private String lastVisitDate;
     private double totalDue;
+    private double creditAmount;
 
     public Customer() {}
 
@@ -147,4 +148,7 @@ public class Customer {
     }
     public double getTotalDue() { return totalDue; }
     public void setTotalDue(double totalDue) { this.totalDue = totalDue; }
+
+    public double getCreditAmount() { return creditAmount; }
+    public void setCreditAmount(double creditAmount) { this.creditAmount = creditAmount; }
 }

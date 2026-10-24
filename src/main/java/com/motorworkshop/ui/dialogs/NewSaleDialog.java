@@ -208,7 +208,7 @@ public class NewSaleDialog extends JDialog {
         cbService.addActionListener(e -> {
             ServiceItem s = (ServiceItem) cbService.getSelectedItem();
             if (s != null && s.getServiceId() > 0) {
-                txtServicePrice.setText(String.valueOf(s.getDefaultPrice()));
+                txtServicePrice.setText(String.valueOf(getServiceRate(s)));
             }
         });
 
@@ -464,7 +464,7 @@ public class NewSaleDialog extends JDialog {
             }
             if (toSelect != null) {
                 cbService.setSelectedItem(toSelect);
-                txtServicePrice.setText(String.valueOf(toSelect.getDefaultPrice()));
+                txtServicePrice.setText(String.valueOf(getServiceRate(toSelect)));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -566,8 +566,11 @@ public class NewSaleDialog extends JDialog {
             return;
         }
 
-        double price = FormatUtil.parseDouble(txtServicePrice.getText(), -1);
-        if (price < 0) {
+        double price = FormatUtil.parseDouble(txtServicePrice.getText(), 0.0);
+        if (price <= 0) {
+            price = getServiceRate(s);
+        }
+        if (price <= 0) {
             UIHelper.showWarning(this, "Please enter a valid service rate!");
             txtServicePrice.requestFocus();
             return;
@@ -576,6 +579,13 @@ public class NewSaleDialog extends JDialog {
         SaleItem item = new SaleItem(SaleItem.ItemType.SERVICE, s.getServiceId(), s.getServiceName(), 1, price, 0.0);
         itemList.add(item);
         refreshTable();
+    }
+
+    private double getServiceRate(ServiceItem service) {
+        if (service.getDefaultPrice() > 0) {
+            return service.getDefaultPrice();
+        }
+        return settingService.getSettings().getDefaultServiceCharge();
     }
 
     private void onAddPart() {
@@ -653,9 +663,6 @@ public class NewSaleDialog extends JDialog {
 
         double subtotal = partsTotal + serviceTotal;
         double discount = FormatUtil.parseDouble(txtDiscount.getText(), 0.0);
-        double netPayable = Math.max(0.0, subtotal - discount);
-        double paidAmt = FormatUtil.parseDouble(txtPaidAmount.getText(), netPayable);
-        double dueAmt = Math.max(0.0, netPayable - paidAmt);
         double total = Math.max(0.0, subtotal - discount);
         double grossProfit = total - cogsTotal;
 

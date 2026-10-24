@@ -2,9 +2,12 @@ package com.motorworkshop.ui;
 
 import com.motorworkshop.model.Customer;
 import com.motorworkshop.model.Sale;
+import com.motorworkshop.model.WorkshopSetting;
 import com.motorworkshop.service.CustomerService;
 import com.motorworkshop.service.SaleService;
 import com.motorworkshop.ui.dialogs.CustomerDialog;
+import com.motorworkshop.ui.dialogs.InvoicePreviewDialog;
+import com.motorworkshop.service.SettingService;
 import com.motorworkshop.util.CsvExporter;
 import com.motorworkshop.util.DateUtil;
 import com.motorworkshop.util.FormatUtil;
@@ -25,6 +28,7 @@ import java.util.List;
 public class CustomerPanel extends JPanel {
     private final CustomerService customerService;
     private final SaleService saleService;
+    private final SettingService settingService;
     private final Frame parentFrame;
 
     private JTextField txtSearch;
@@ -33,9 +37,11 @@ public class CustomerPanel extends JPanel {
     private List<Customer> currentCustomerList = new ArrayList<>();
     private JLabel lblTotalCustomers;
 
-    public CustomerPanel(CustomerService customerService, SaleService saleService, Frame parentFrame) {
+    public CustomerPanel(CustomerService customerService, SaleService saleService,
+                         SettingService settingService, Frame parentFrame) {
         this.customerService = customerService;
         this.saleService = saleService;
+        this.settingService = settingService;
         this.parentFrame = parentFrame;
 
         setLayout(new BorderLayout(12, 12));
@@ -103,7 +109,7 @@ public class CustomerPanel extends JPanel {
         add(topContainer, BorderLayout.NORTH);
 
         // Table
-        String[] cols = {"S.N.", "Name", "Phone Number", "Address", "Plate / Reg No", "Brand", "Model", "Total Visits", "Total Spent (Rs.)", "Credit Due (Rs.)", "Last Visit"};
+        String[] cols = {"S.N.", "Name", "Phone Number", "Address", "Plate / Reg No", "Brand", "Model", "Total Visits", "Total Spent (Rs.)", "Recorded Credit (Rs.)", "Credit Due (Rs.)", "Last Visit"};
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -141,6 +147,7 @@ public class CustomerPanel extends JPanel {
                             c.getVehicleModel() != null ? c.getVehicleModel() : "-",
                             c.getTotalVisits(),
                             FormatUtil.formatCurrencyPlain(c.getTotalSpent()),
+                            FormatUtil.formatCurrencyPlain(c.getCreditAmount()),
                             FormatUtil.formatCurrencyPlain(c.getTotalDue()),
                             c.getLastVisitDate() != null ? DateUtil.formatForDisplay(c.getLastVisitDate()) : "Never"
                     });
@@ -189,7 +196,7 @@ public class CustomerPanel extends JPanel {
         }
 
         try {
-            List<Sale> sales = saleService.searchSales(c.getPhone(), null, null, null);
+            List<Sale> sales = saleService.getSalesByCustomerId(c.getCustomerId());
             if (sales.isEmpty()) {
                 UIHelper.showInfo(this, "No previous bills or service visits found for " + c.getName());
                 return;
@@ -215,7 +222,32 @@ public class CustomerPanel extends JPanel {
             UIHelper.styleTable(table);
             JScrollPane sp = new JScrollPane(table);
             sp.setPreferredSize(new Dimension(750, 300));
-            JOptionPane.showMessageDialog(this, sp, "Visit History for " + c.getName() + " (" + c.getPhone() + ")", JOptionPane.INFORMATION_MESSAGE);
+
+            JOptionPane historyPane = new JOptionPane(
+                    sp,
+                    JOptionPane.INFORMATION_MESSAGE,
+                    JOptionPane.DEFAULT_OPTION,
+                    null,
+                    new Object[]{"View Invoice", "Close"},
+                    "View Invoice"
+            );
+            JDialog historyDialog = historyPane.createDialog(
+                    this,
+                    "Visit History for " + c.getName() + " (" + c.getPhone() + ")"
+            );
+            historyDialog.setVisible(true);
+
+            if ("View Invoice".equals(historyPane.getValue())) {
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow < 0 || selectedRow >= sales.size()) {
+                    UIHelper.showWarning(this, "Please select an invoice from the history table.");
+                    return;
+                }
+
+                Sale fullSale = saleService.getSaleById(sales.get(selectedRow).getSaleId());
+                WorkshopSetting settings = settingService.getSettings();
+                new InvoicePreviewDialog(parentFrame, fullSale, settings).setVisible(true);
+            }
 
         } catch (Exception e) {
             UIHelper.showError(this, "Error fetching history: " + e.getMessage());

@@ -197,6 +197,19 @@ public class SchemaInitializer {
                     "created_at TEXT NOT NULL" +
                     ");");
 
+            try (var rs = stmt.executeQuery("PRAGMA table_info(customers)")) {
+                boolean hasCreditAmount = false;
+                while (rs.next()) {
+                    if ("credit_amount".equalsIgnoreCase(rs.getString("name"))) {
+                        hasCreditAmount = true;
+                        break;
+                    }
+                }
+                if (!hasCreditAmount) {
+                    stmt.execute("ALTER TABLE customers ADD COLUMN credit_amount REAL NOT NULL DEFAULT 0.0");
+                }
+            }
+
             // Purchases table
             stmt.execute("CREATE TABLE IF NOT EXISTS purchases (" +
                     "purchase_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -261,6 +274,17 @@ public class SchemaInitializer {
                     "total_cost REAL NOT NULL DEFAULT 0.0, " +
                     "FOREIGN KEY (sale_id) REFERENCES sales(sale_id) ON DELETE CASCADE" +
                     ");");
+
+                    // Repair invoice summaries from their line items so service fees remain accurate
+                    // for invoices created before service totals were calculated consistently.
+                    stmt.execute("UPDATE sales SET " +
+                        "service_charge = COALESCE((SELECT SUM(total_price) FROM sale_items WHERE sale_id = sales.sale_id AND item_type = 'SERVICE'), 0.0), " +
+                        "parts_total = COALESCE((SELECT SUM(total_price) FROM sale_items WHERE sale_id = sales.sale_id AND item_type = 'PART'), 0.0)");
+                    stmt.execute("UPDATE sales SET " +
+                        "subtotal = parts_total + service_charge, " +
+                        "total_amount = MAX(0.0, parts_total + service_charge - discount), " +
+                        "gross_profit = MAX(0.0, parts_total + service_charge - discount) - total_cogs");
+                        stmt.execute("UPDATE sales SET due_amount = MAX(0.0, total_amount - paid_amount)");
 
             // Expenses table
             stmt.execute("CREATE TABLE IF NOT EXISTS expenses (" +

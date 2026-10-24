@@ -29,6 +29,7 @@ public class SalesPanel extends JPanel {
     private final CustomerService customerService;
     private final SettingService settingService;
     private final Frame parentFrame;
+    private final boolean showFinancials;
 
     private JTextField txtSearch;
     private JTextField txtStartDate;
@@ -47,13 +48,14 @@ public class SalesPanel extends JPanel {
 
     public SalesPanel(SaleService saleService, InventoryService inventoryService,
                       PricingService pricingService, CustomerService customerService,
-                      SettingService settingService, Frame parentFrame) {
+                      SettingService settingService, Frame parentFrame, boolean showFinancials) {
         this.saleService = saleService;
         this.inventoryService = inventoryService;
         this.pricingService = pricingService;
         this.customerService = customerService;
         this.settingService = settingService;
         this.parentFrame = parentFrame;
+        this.showFinancials = showFinancials;
 
         setLayout(new BorderLayout(12, 12));
         setBorder(new EmptyBorder(15, 18, 15, 18));
@@ -147,7 +149,9 @@ public class SalesPanel extends JPanel {
         add(topContainer, BorderLayout.NORTH);
 
         // Sales Table
-        String[] cols = {"S.N.", "Inv #", "Date", "Customer Name", "Phone", "Vehicle", "Plate No", "Parts Total", "Service Fee", "Discount", "Total Paid", "COGS", "Gross Profit", "Payment"};
+        String[] cols = showFinancials
+            ? new String[]{"S.N.", "Inv #", "Date", "Customer Name", "Phone", "Vehicle", "Plate No", "Parts Total", "Service Fee", "Discount", "Total Paid", "COGS", "Gross Profit", "Payment"}
+            : new String[]{"S.N.", "Inv #", "Date", "Customer Name", "Phone", "Vehicle", "Plate No", "Parts Total", "Service Fee", "Discount", "Total Paid", "Payment"};
         tableModel = new DefaultTableModel(cols, 0) {
             public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -186,7 +190,9 @@ public class SalesPanel extends JPanel {
         footerBar.add(lblTotalService);
         footerBar.add(new JSeparator(JSeparator.VERTICAL));
         footerBar.add(lblTotalRevenue);
-        footerBar.add(lblTotalGrossProfit);
+        if (showFinancials) {
+            footerBar.add(lblTotalGrossProfit);
+        }
         add(footerBar, BorderLayout.SOUTH);
     }
 
@@ -213,22 +219,29 @@ public class SalesPanel extends JPanel {
                     totalParts += s.getPartsTotal();
                     totalService += s.getServiceCharge();
 
-                    tableModel.addRow(new Object[]{
-                            sn++,
-                            s.getInvoiceNumber(),
-                            DateUtil.toDisplayDate(s.getDate()),
-                            s.getCustomerName(),
-                            s.getCustomerPhone() != null ? s.getCustomerPhone() : "-",
+                        Object[] row = new Object[]{
+                            sn++, s.getInvoiceNumber(), DateUtil.toDisplayDate(s.getDate()),
+                            s.getCustomerName(), s.getCustomerPhone() != null ? s.getCustomerPhone() : "-",
                             (s.getVehicleBrand() != null ? s.getVehicleBrand() : "") + " " + (s.getVehicleModel() != null ? s.getVehicleModel() : ""),
                             s.getVehicleRegNo() != null ? s.getVehicleRegNo() : "-",
                             FormatUtil.formatCurrencyPlain(s.getPartsTotal()),
                             FormatUtil.formatCurrencyPlain(s.getServiceCharge()),
                             FormatUtil.formatCurrencyPlain(s.getDiscount()),
                             FormatUtil.formatCurrencyPlain(s.getTotalAmount()),
-                            FormatUtil.formatCurrencyPlain(s.getTotalCogs()),
-                            FormatUtil.formatCurrencyPlain(s.getGrossProfit()),
                             s.getPaymentMethod()
-                    });
+                        };
+                        if (showFinancials) {
+                        row = new Object[]{
+                            sn - 1, s.getInvoiceNumber(), DateUtil.toDisplayDate(s.getDate()),
+                            s.getCustomerName(), s.getCustomerPhone() != null ? s.getCustomerPhone() : "-",
+                            (s.getVehicleBrand() != null ? s.getVehicleBrand() : "") + " " + (s.getVehicleModel() != null ? s.getVehicleModel() : ""),
+                            s.getVehicleRegNo() != null ? s.getVehicleRegNo() : "-",
+                            FormatUtil.formatCurrencyPlain(s.getPartsTotal()), FormatUtil.formatCurrencyPlain(s.getServiceCharge()),
+                            FormatUtil.formatCurrencyPlain(s.getDiscount()), FormatUtil.formatCurrencyPlain(s.getTotalAmount()),
+                            FormatUtil.formatCurrencyPlain(s.getTotalCogs()), FormatUtil.formatCurrencyPlain(s.getGrossProfit()), s.getPaymentMethod()
+                        };
+                        }
+                        tableModel.addRow(row);
                 }
 
                 lblTotalBills.setText("Total Bills: " + currentSalesList.size());

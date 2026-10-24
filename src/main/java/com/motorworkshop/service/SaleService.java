@@ -29,6 +29,10 @@ public class SaleService {
         return saleDAO.searchSales(query, startDate, endDate, paymentMethod);
     }
 
+    public List<Sale> getSalesByCustomerId(int customerId) throws SQLException {
+        return saleDAO.getSalesByCustomerId(customerId);
+    }
+
     public String generateNextInvoiceNumber() {
         WorkshopSetting settings = settingDAO.getSettings();
         return saleDAO.generateNextInvoiceNumber(settings.getInvoicePrefix());

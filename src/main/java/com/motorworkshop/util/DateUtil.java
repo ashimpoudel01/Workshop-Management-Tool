@@ -57,7 +57,13 @@ public class DateUtil {
     }
 
     public static String startOfMonthBs() {
-        return formatBs(LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()));
+        String currentBs = todayBs();
+        int separator = currentBs.indexOf('-');
+        int daySeparator = currentBs.indexOf('-', separator + 1);
+        if (separator > 0 && daySeparator > separator) {
+            return currentBs.substring(0, daySeparator) + "-01 BS";
+        }
+        return currentBs;
     }
 
     public static String now() {

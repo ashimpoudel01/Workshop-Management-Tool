@@ -130,6 +130,22 @@ public class SaleDAO {
         return list;
     }
 
+    public List<Sale> getSalesByCustomerId(int customerId) throws SQLException {
+        List<Sale> list = new ArrayList<>();
+        String sql = "SELECT * FROM sales WHERE customer_id = ? ORDER BY date DESC, sale_id DESC";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, customerId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapSaleSummary(rs));
+                }
+            }
+        }
+        return list;
+    }
+
     /**
      * Atomically creates a Sale transaction:
      * - Verifies stock for parts

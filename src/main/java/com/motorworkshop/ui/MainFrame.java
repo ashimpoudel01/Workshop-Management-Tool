@@ -33,6 +33,7 @@ public class MainFrame extends JFrame {
     private final PricingService pricingService = new PricingService();
     private final ReportService reportService = new ReportService();
     private final SettingService settingService = new SettingService();
+    private final UserRole userRole;
 
     private CardLayout cardLayout;
     private JPanel mainContentPanel;
@@ -50,8 +51,9 @@ public class MainFrame extends JFrame {
     private ReportsPanel reportsPanel;
     private SettingsPanel settingsPanel;
 
-    public MainFrame() {
+    public MainFrame(UserRole userRole) {
         super("Motorcycle & Scooter Workshop Management Tool");
+        this.userRole = userRole;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 800);
         setMinimumSize(new Dimension(1024, 680));
@@ -104,21 +106,27 @@ public class MainFrame extends JFrame {
         sidebar.add(brandPanel, BorderLayout.NORTH);
 
         // Nav Items list
-        JPanel navList = new JPanel(new GridLayout(9, 1, 0, 4));
+        String[][] sectionDefs = userRole == UserRole.ADMIN
+            ? new String[][]{
+            {"Dashboard", "📊   Admin Dashboard"},
+            {"Sales", "🧾   Sales & Job Cards"},
+            {"Purchases", "🛒   Parts Purchases"},
+            {"Inventory", "📦   Parts & Inventory"},
+            {"Expenses", "💸   Workshop Expenses"},
+            {"Pricing", "🏷️   Pricing & Labor"},
+            {"Customers", "👥   Customer Directory"},
+            {"Reports", "📈   Financial Reports"},
+            {"Settings", "⚙️   System Settings"}
+        }
+            : new String[][]{
+            {"Dashboard", "📊   Employee Dashboard"},
+            {"Sales", "🧾   Sales & Job Cards"},
+            {"Inventory", "📦   View Inventory"},
+            {"Customers", "👥   Customer Directory"}
+        };
+        JPanel navList = new JPanel(new GridLayout(sectionDefs.length, 1, 0, 4));
         navList.setBackground(SIDEBAR_BG);
         navList.setBorder(new EmptyBorder(10, 8, 10, 8));
-
-        String[][] sectionDefs = {
-                {"Dashboard", "📊   Dashboard"},
-                {"Sales", "🧾   Sales & Job Cards"},
-                {"Purchases", "🛒   Parts Purchases"},
-                {"Inventory", "📦   Parts & Inventory"},
-                {"Expenses", "💸   Workshop Expenses"},
-                {"Pricing", "🏷️   Pricing & Labor"},
-                {"Customers", "👥   Customer Directory"},
-                {"Reports", "📈   Financial Reports"},
-                {"Settings", "⚙️   System Settings"}
-        };
 
         for (String[] def : sectionDefs) {
             String secKey = def[0];
@@ -158,13 +166,13 @@ public class MainFrame extends JFrame {
         mainContentPanel.setBackground(UIHelper.BG_LIGHT);
 
         // Initialize panels
-        dashboardPanel = new DashboardPanel(saleService, this::showSection, this::openNewSale, this::openNewPurchase);
-        salesPanel = new SalesPanel(saleService, inventoryService, pricingService, customerService, settingService, this);
+        dashboardPanel = new DashboardPanel(saleService, userRole, this::showSection, this::openNewSale, this::openNewPurchase);
+        salesPanel = new SalesPanel(saleService, inventoryService, pricingService, customerService, settingService, this, userRole == UserRole.ADMIN);
         purchasePanel = new PurchasePanel(purchaseService, inventoryService, this);
-        inventoryPanel = new InventoryPanel(inventoryService, this);
+        inventoryPanel = new InventoryPanel(inventoryService, this, userRole == UserRole.ADMIN);
         expensePanel = new ExpensePanel(expenseService, this);
         pricingPanel = new PricingPanel(pricingService, this);
-        customerPanel = new CustomerPanel(customerService, saleService, this);
+        customerPanel = new CustomerPanel(customerService, saleService, settingService, this);
         reportsPanel = new ReportsPanel(reportService);
         settingsPanel = new SettingsPanel(settingService, this);
 
@@ -293,6 +301,10 @@ public class MainFrame extends JFrame {
     }
 
     private void openNewPurchase() {
+        if (userRole != UserRole.ADMIN) {
+            UIHelper.showWarning(this, "Only administrators can record parts purchases.");
+            return;
+        }
         purchasePanel.openNewPurchase();
         notifyDataChanged();
     }
