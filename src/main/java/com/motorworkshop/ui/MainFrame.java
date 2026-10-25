@@ -29,6 +29,7 @@ public class MainFrame extends JFrame {
     private final InventoryService inventoryService = new InventoryService();
     private final PurchaseService purchaseService = new PurchaseService();
     private final ExpenseService expenseService = new ExpenseService();
+    private final OwnerExpenseService ownerExpenseService = new OwnerExpenseService();
     private final CustomerService customerService = new CustomerService();
     private final PricingService pricingService = new PricingService();
     private final ReportService reportService = new ReportService();
@@ -46,6 +47,7 @@ public class MainFrame extends JFrame {
     private PurchasePanel purchasePanel;
     private InventoryPanel inventoryPanel;
     private ExpensePanel expensePanel;
+    private OwnerExpensePanel ownerExpensePanel;
     private PricingPanel pricingPanel;
     private CustomerPanel customerPanel;
     private ReportsPanel reportsPanel;
@@ -113,6 +115,7 @@ public class MainFrame extends JFrame {
             {"Purchases", "🛒   Parts Purchases"},
             {"Inventory", "📦   Parts & Inventory"},
             {"Expenses", "💸   Workshop Expenses"},
+                {"OwnerExpenses", "💰   Owner Expenses"},
             {"Pricing", "🏷️   Pricing & Labor"},
             {"Customers", "👥   Customer Directory"},
             {"Reports", "📈   Financial Reports"},
@@ -171,6 +174,7 @@ public class MainFrame extends JFrame {
         purchasePanel = new PurchasePanel(purchaseService, inventoryService, this);
         inventoryPanel = new InventoryPanel(inventoryService, this, userRole == UserRole.ADMIN);
         expensePanel = new ExpensePanel(expenseService, this);
+        ownerExpensePanel = new OwnerExpensePanel(ownerExpenseService, this);
         pricingPanel = new PricingPanel(pricingService, this);
         customerPanel = new CustomerPanel(customerService, saleService, settingService, this);
         reportsPanel = new ReportsPanel(reportService);
@@ -181,6 +185,7 @@ public class MainFrame extends JFrame {
         mainContentPanel.add(purchasePanel, "Purchases");
         mainContentPanel.add(inventoryPanel, "Inventory");
         mainContentPanel.add(expensePanel, "Expenses");
+        mainContentPanel.add(ownerExpensePanel, "OwnerExpenses");
         mainContentPanel.add(pricingPanel, "Pricing");
         mainContentPanel.add(customerPanel, "Customers");
         mainContentPanel.add(reportsPanel, "Reports");
@@ -268,6 +273,9 @@ public class MainFrame extends JFrame {
             case "Expenses":
                 expensePanel.loadData();
                 break;
+            case "OwnerExpenses":
+                ownerExpensePanel.loadData();
+                break;
             case "Pricing":
                 pricingPanel.loadPartsData();
                 pricingPanel.loadServicesData();
@@ -288,6 +296,7 @@ public class MainFrame extends JFrame {
         if (purchasePanel != null) purchasePanel.loadData();
         if (inventoryPanel != null) inventoryPanel.loadData();
         if (expensePanel != null) expensePanel.loadData();
+        if (ownerExpensePanel != null) ownerExpensePanel.loadData();
         if (pricingPanel != null) {
             pricingPanel.loadPartsData();
             pricingPanel.loadServicesData();

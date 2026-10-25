@@ -297,6 +297,16 @@ public class SchemaInitializer {
                     "notes TEXT" +
                     ");");
 
+                    stmt.execute("CREATE TABLE IF NOT EXISTS owner_expenses (" +
+                        "owner_expense_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        "date TEXT NOT NULL, " +
+                        "category TEXT NOT NULL, " +
+                        "description TEXT NOT NULL, " +
+                        "amount REAL NOT NULL, " +
+                        "payment_method TEXT NOT NULL DEFAULT 'Cash', " +
+                        "notes TEXT" +
+                        ");");
+
             // Create helpful search & performance indexes
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_products_name ON products(part_name);");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_products_part_no ON products(part_number);");
